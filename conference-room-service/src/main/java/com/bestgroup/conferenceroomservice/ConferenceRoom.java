@@ -1,8 +1,5 @@
 package com.bestgroup.conferenceroomservice;
 
-
-import sun.util.resources.Bundles;
-
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
