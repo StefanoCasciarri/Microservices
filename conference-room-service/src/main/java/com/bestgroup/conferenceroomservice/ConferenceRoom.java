@@ -9,16 +9,16 @@ public class ConferenceRoom  {
     @Id
     @Column(name = "roomId")
     @GeneratedValue(strategy=GenerationType.AUTO)
-    int roomId;
+    private int id;
 
     @Column(name = "floor")
-    int floor;
+    private int floor;
 
     @Column(name ="name")
-    String name;
+    private String name;
 
     @Column(name ="size")
-    int size;
+    private int size;
 
     public ConferenceRoom() {
     }
@@ -29,12 +29,8 @@ public class ConferenceRoom  {
         this.size = size;
     }
 
-    public long getRoomId() {
-        return roomId;
-    }
-
-    public void setRoomId(int roomId) {
-        this.roomId = roomId;
+    public long getId() {
+        return id;
     }
 
     public int getFloor() {
@@ -59,5 +55,15 @@ public class ConferenceRoom  {
 
     public void setSize(int size) {
         this.size = size;
+    }
+
+    @Override
+    public String toString() {
+        return "ConferenceRoom{" +
+                "id=" + id +
+                ", floor=" + floor +
+                ", name='" + name + '\'' +
+                ", size=" + size +
+                '}';
     }
 }
