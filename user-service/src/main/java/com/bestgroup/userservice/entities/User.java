@@ -1,6 +1,8 @@
 package com.bestgroup.userservice.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -15,7 +17,10 @@ public class User {
     private String firstName;
     private String lastName;
 
-    @OneToMany( mappedBy = "userId")
+
+    @JsonBackReference
+    @OneToMany( fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "userId",
+              orphanRemoval = true)
     private List<UserBookings> bookings;
 
 
@@ -29,9 +34,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + userId +
+                "userId=" + userId +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", bookings=" + bookings +
                 '}';
     }
 

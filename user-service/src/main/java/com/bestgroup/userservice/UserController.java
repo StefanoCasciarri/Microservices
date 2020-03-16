@@ -21,7 +21,7 @@ public class UserController {
 
     @GetMapping("/users")
     public List<User> retrieveAllUsers() {
-        return userRepository.findAll();
+          return userRepository.findAll();
     }
 
     @PostMapping("/users")
@@ -53,9 +53,9 @@ public class UserController {
 
     @GetMapping("/users/{id}/bookings")
     public List<UserBookings> retrieveUserBookings(@PathVariable int id) {
-        Optional<User> optionalUser = userRepository.findByUserIdWithBookings(id);
-
+        Optional<User> optionalUser = userRepository.findById(id);
+        //TODO communicate with second microservice and retrieving booking information
         return optionalUser.get().getBookings();
     }
-
+    //TODO restpoint for other service to add bookings for persons 
 }
