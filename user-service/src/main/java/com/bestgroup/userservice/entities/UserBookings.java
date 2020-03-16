@@ -1,17 +1,23 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.entities;
+
 
 
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 
 @Entity
 public class UserBookings {
+
     @Id
+    @Positive
     private int bookingId;
+
     @ManyToOne
-    User userId;
+    @Positive
+    private User userId;
 
     public UserBookings() {
     }
