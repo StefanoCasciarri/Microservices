@@ -29,7 +29,7 @@ public class ConferenceRoom  {
         this.size = size;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -41,11 +41,11 @@ public class ConferenceRoom  {
         this.floor = floor;
     }
 
-    public String getNumber() {
+    public String getName() {
         return name;
     }
 
-    public void setNumber(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
