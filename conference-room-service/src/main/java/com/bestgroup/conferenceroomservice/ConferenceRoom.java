@@ -25,7 +25,7 @@ public class ConferenceRoom  {
     private int size;
 
 
-    @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "twitterUser")
+    @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)//, mappedBy = "conferenceRoom"
     private List<RoomBooking> roomBookings;
 
     public ConferenceRoom() {

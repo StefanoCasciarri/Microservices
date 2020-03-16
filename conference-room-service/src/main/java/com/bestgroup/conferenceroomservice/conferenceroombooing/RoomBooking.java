@@ -21,7 +21,7 @@ public class RoomBooking {
 //    @JoinColumn(name="roomId")
 //    private ConferenceRoom conferenceRoom;
 
-    private int userId;
+    private int roomId;
     private Date startDateTime;
     private Date endDateTime;
 }
