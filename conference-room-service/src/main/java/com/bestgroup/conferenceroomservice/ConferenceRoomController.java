@@ -30,4 +30,16 @@ public class ConferenceRoomController {
         return roomService.getRoomById(id);
     }
 
+    @DeleteMapping("/conference-rooms/{id}")
+    public void deleteRoomById(@PathVariable Integer id){
+         roomService.deleteRoomById(id);
+    }
+
+    @PutMapping("/conference-rooms/{id}")
+    public ResponseEntity<ConferenceRoom> update(@PathVariable Integer id, @RequestBody ConferenceRoom room){
+        room = roomService.update(id,room);
+        return new ResponseEntity<ConferenceRoom>(room, HttpStatus.CREATED);
+    }
+
+
 }

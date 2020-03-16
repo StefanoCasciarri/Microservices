@@ -24,4 +24,21 @@ public class ConferenceRoomService {
     public ConferenceRoom getRoomById(Integer id) {
         return conferenceRoomRepository.findById(id).orElseThrow( () -> new ResourceNotFoundException("No such room."));
     }
+
+    public void deleteRoomById(Integer id) {
+        conferenceRoomRepository.deleteById(id);
+    }
+
+    public ConferenceRoom update(Integer id, ConferenceRoom room) {
+
+        ConferenceRoom roomEntityUpdated = conferenceRoomRepository.findById(id).orElseThrow(()->new ResourceNotFoundException("No such room."));
+
+
+        roomEntityUpdated.setFloor(room.getFloor());
+        roomEntityUpdated.setName(room.getName());
+        roomEntityUpdated.setSize(room.getSize());
+
+        return conferenceRoomRepository.save(roomEntityUpdated);
+
+    }
 }
