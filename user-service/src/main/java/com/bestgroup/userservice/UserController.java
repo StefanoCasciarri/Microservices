@@ -4,8 +4,12 @@ package com.bestgroup.userservice;
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBookings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,8 +29,15 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public void createUser(@RequestBody User user) {
+    public ResponseEntity<Object> createUser(@Valid @RequestBody User user) {
         User savedUser = userRepository.save(user);
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(savedUser.getId()).toUri();
+
+        return ResponseEntity.created(location).build();
     }
 
     @GetMapping("/users/{id}")
@@ -41,7 +52,7 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public void updateUser(@PathVariable int id, @RequestBody User updatedUser) {
+    public void updateUser(@PathVariable int id, @Valid @RequestBody User updatedUser) {
             userRepository.findById(id)
                 .map(user -> {
                     user.setFirstName(updatedUser.getFirstName());
@@ -54,7 +65,6 @@ public class UserController {
     @GetMapping("/users/{id}/bookings")
     public List<UserBookings> retrieveUserBookings(@PathVariable int id) {
         Optional<User> optionalUser = userRepository.findByUserIdWithBookings(id);
-
         return optionalUser.get().getBookings();
     }
 

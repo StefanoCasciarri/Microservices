@@ -16,7 +16,6 @@ public class UserBookings {
     private int bookingId;
 
     @ManyToOne
-    @NotNull
     @Positive
     private User userId;
 
