@@ -1,4 +1,4 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.entities;
 
 
 import javax.persistence.*;
@@ -6,11 +6,12 @@ import java.util.List;
 
 
 @Entity
+@Table(name="tuser")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private int userId;
     private String firstName;
     private String lastName;
 
@@ -28,14 +29,14 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "id=" + userId +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';
     }
 
     public int getId() {
-        return id;
+        return userId;
     }
 
     public String getFirstName() {
@@ -52,5 +53,13 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public List<UserBookings> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<UserBookings> bookings) {
+        this.bookings = bookings;
     }
 }

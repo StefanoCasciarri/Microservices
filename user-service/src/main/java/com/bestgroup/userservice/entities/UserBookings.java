@@ -1,13 +1,14 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.entities;
+
 
 
 import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
 @Entity
 public class UserBookings {
+
     @Id
     private int bookingId;
     @ManyToOne

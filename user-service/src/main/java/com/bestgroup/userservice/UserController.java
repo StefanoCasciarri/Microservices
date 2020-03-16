@@ -1,10 +1,11 @@
 package com.bestgroup.userservice;
 
 
+import com.bestgroup.userservice.entities.User;
+import com.bestgroup.userservice.entities.UserBookings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,6 +49,13 @@ public class UserController {
                     return userRepository.save(user);
                 });
 
+    }
+
+    @GetMapping("/users/{id}/bookings")
+    public List<UserBookings> retrieveUserBookings(@PathVariable int id) {
+        Optional<User> optionalUser = userRepository.findByUserIdWithBookings(id);
+
+        return optionalUser.get().getBookings();
     }
 
 }
