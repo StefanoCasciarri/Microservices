@@ -16,12 +16,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int userId;
 
-    @Size(min=2, max=30)
     @NotNull
+    @Size(min=2, max=30)
     private String firstName;
 
-    @Size(min=2, max=30)
     @NotNull
+    @Size(min=2, max=30)
     private String lastName;
 
     @OneToMany( mappedBy = "userId")

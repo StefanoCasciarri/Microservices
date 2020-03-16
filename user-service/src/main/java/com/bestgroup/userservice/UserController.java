@@ -43,6 +43,11 @@ public class UserController {
     @GetMapping("/users/{id}")
     public User retrieveUser(@PathVariable int id) {
         Optional<User> optionalUser = userRepository.findById(id);
+
+        if(!optionalUser.isPresent()) {
+            throw new UserNotFoundException("id: " + id);
+        }
+
         return optionalUser.get();
     }
 
