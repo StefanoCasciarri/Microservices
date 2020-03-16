@@ -1,47 +1,63 @@
 package com.bestgroup.conferenceroomservice;
 
-
-import sun.util.resources.Bundles;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
-public class ConferenceRoom {
+@Table(name="conferenceRooms")
+public class ConferenceRoom  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @Column(name = "roomId")
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    int roomId;
 
-    private String name;
+    @Column(name = "floor")
+    int floor;
 
-    @Override
-    public String toString() {
-        return "ConferenceRoom{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+    @Column(name ="name")
+    String name;
+
+    @Column(name ="size")
+    int size;
+
+    public ConferenceRoom() {
     }
 
-    public ConferenceRoom() {}
-
-    public ConferenceRoom(String name) {
+    public ConferenceRoom(int floor,String name,int size){
+        this.floor = floor;
         this.name = name;
+        this.size = size;
     }
 
-    public int getId() {
-        return id;
+    public long getRoomId() {
+        return roomId;
     }
 
-    public String getName() {
+    public void setRoomId(int roomId) {
+        this.roomId = roomId;
+    }
+
+    public int getFloor() {
+        return floor;
+    }
+
+    public void setFloor(int floor) {
+        this.floor = floor;
+    }
+
+    public String getNumber() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setNumber(String name) {
         this.name = name;
     }
 
+    public int getSize() {
+        return size;
+    }
 
+    public void setSize(int size) {
+        this.size = size;
+    }
 }
