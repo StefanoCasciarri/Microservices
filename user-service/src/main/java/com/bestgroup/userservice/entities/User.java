@@ -2,6 +2,9 @@ package com.bestgroup.userservice.entities;
 
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 
@@ -12,7 +15,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int userId;
+
+    @Size(min=2, max=30)
+    @NotNull
     private String firstName;
+
+    @Size(min=2, max=30)
+    @NotNull
     private String lastName;
 
     @OneToMany( mappedBy = "userId")
