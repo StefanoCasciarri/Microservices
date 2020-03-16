@@ -15,6 +15,12 @@ public class RoomBooking {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
+//  TODO: it will look like that after ConferenceRoom is ready
+//          but then Dto is needed
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name="roomId")
+//    private ConferenceRoom conferenceRoom;
+
     private int userId;
     private Date startDateTime;
     private Date endDateTime;
