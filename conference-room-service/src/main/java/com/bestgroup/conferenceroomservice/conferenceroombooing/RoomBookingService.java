@@ -2,6 +2,7 @@ package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
 import com.bestgroup.conferenceroomservice.ConferenceRoom;
 import com.bestgroup.conferenceroomservice.ConferenceRoomRepository;
+import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -25,6 +26,7 @@ public class RoomBookingService {
         roomBookingRepository.save(roomBooking);
 
         Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomBooking.getRoomId());
+        optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         optionalConferenceRoom.get().addRoomBookings(roomBooking);
         conferenceRoomRepository.save(optionalConferenceRoom.get());
 
@@ -34,6 +36,7 @@ public class RoomBookingService {
     public List<RoomBooking> getRoomBookings(int id) {
 
         Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(id);
+        optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         //TODO: call USER microservice to get info about user connected with booking
         //TODO: then change the retrun structure
 

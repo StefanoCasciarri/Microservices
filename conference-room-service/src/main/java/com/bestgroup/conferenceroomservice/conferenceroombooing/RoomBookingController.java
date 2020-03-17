@@ -18,9 +18,9 @@ public class RoomBookingController {
     }
 
 
-    @PostMapping("/conference-rooms/{id}/bookings")
-    public ResponseEntity<RoomBooking> createRoomBooking(@PathVariable Integer id, @RequestBody RoomBooking roomBooking) {
-        roomBooking.setRoomId(id);
+    @PostMapping("/conference-rooms/{roomId}/bookings")
+    public ResponseEntity<RoomBooking> createRoomBooking(@PathVariable Integer roomId, @RequestBody RoomBooking roomBooking) {
+        roomBooking.setRoomId(roomId);
         roomBookingService.createRoomBooking(roomBooking);
         return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
     }
