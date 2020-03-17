@@ -29,13 +29,6 @@ public class RoomBookingService {
         this.validationService = validationService;
     }
 
-    public RoomBooking createRoomBooking(RoomBooking roomBooking) {
-        validationService.isDurationValid(roomBooking);
-        roomBookingRepository.save(roomBooking);
-
-        return roomBooking;
-    }
-
     public List<RoomBooking> getRoomBookings(int id) {
 
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(id);
@@ -46,14 +39,29 @@ public class RoomBookingService {
         return conferenceRoom.get().getRoomBookings();
     }
 
-    public void addRoomBookingstoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
-        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
-        optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
-        ConferenceRoom conferenceRoom = optionalConferenceRoom.get();
-        conferenceRoom.getRoomBookings().add(roomBooking);
-        roomBooking.setConferenceRoom(conferenceRoom);
 
-        conferenceRoomRepository.save(conferenceRoom);
+    public RoomBooking createRoomBooking(RoomBooking roomBooking) {
+        validationService.isDurationValid(roomBooking);
+        roomBookingRepository.save(roomBooking);
+
+        return roomBooking;
+    }
+
+    public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
+        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
+        ConferenceRoom conferenceRoom;
+        if(optionalConferenceRoom.isPresent()){
+            conferenceRoom = optionalConferenceRoom.get();
+            conferenceRoom.getRoomBookings().add(roomBooking);
+            roomBooking.setConferenceRoom(conferenceRoom);
+            conferenceRoomRepository.save(conferenceRoom);
+        }
+        else{
+            //if room doesnt exist then delete saved roomBooking
+            roomBookingRepository.delete(roomBooking);
+            throw new ResourceNotFoundException("No such room.");
+        }
+        return conferenceRoom;
     }
 
     public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {

@@ -24,7 +24,7 @@ public class RoomBookingController {
                                                          @RequestParam Integer userId,
                                                          @Valid @RequestBody RoomBooking roomBooking) {
         roomBookingService.createRoomBooking(roomBooking);
-        roomBookingService.addRoomBookingstoConferenceRoom(roomId, roomBooking);
+        roomBookingService.saveRoomBookingtoConferenceRoom(roomId, roomBooking);
         roomBookingService.saveRoomBookingtoUser(userId, roomBooking);
 
         return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
