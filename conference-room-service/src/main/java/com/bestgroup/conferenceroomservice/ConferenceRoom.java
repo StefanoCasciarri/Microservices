@@ -3,6 +3,7 @@ package com.bestgroup.conferenceroomservice;
 import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBooking;
 
 import javax.persistence.*;
+import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,14 +16,22 @@ public class ConferenceRoom  {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int roomId;
 
+    @NotNull(message = "Field must not be empty.")
+    @Min(value=0)
+    @Max(value=50)
     @Column(name = "floor")
-    private int floor;
+    private Integer floor;
 
+    @NotBlank(message = "Field must not be empty.")
+    @Size(min=2,max=30)
     @Column(name ="name")
     private String name;
 
+    @NotNull(message = "Field must not be empty.")
+    @Min(value=1)
+    @Max(value=50)
     @Column(name ="size")
-    private int size;
+    private Integer size;
 
 
     @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)//, mappedBy = "conferenceRoom"
