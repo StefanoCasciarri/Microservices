@@ -3,9 +3,13 @@ package com.bestgroup.conferenceroomservice.conferenceroombooing;
 import com.bestgroup.conferenceroomservice.ConferenceRoom;
 import com.bestgroup.conferenceroomservice.ConferenceRoomRepository;
 import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
+import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,5 +53,25 @@ public class RoomBookingService {
         //TODO: then change the retrun structure
 
         return optionalConferenceRoom.get().getRoomBookings();
+    }
+
+    public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
+        RestTemplate restTemplate = new RestTemplate();
+  ///      restTemplate.getMessageConverters().add(new StringHttpMessageConverter());//TODO is that necessary?
+
+        int bookingID = roomBooking.getRoomBookingId();
+        String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
+        ResponseEntity<UserBooking> userBookingResponseEntity;
+        try {
+            userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
+        }
+        catch(Exception e){
+            //TODO rollback saved info
+            throw new ResourceNotFoundException("Cant save to user");
+        }
+        finally {
+            System.out.println("FINALLY");
+        }
+        return  userBookingResponseEntity.getBody();
     }
 }

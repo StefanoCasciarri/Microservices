@@ -29,23 +29,7 @@ public class RoomBookingController {
                                                          @RequestParam Integer userId,
                                                          @Valid @RequestBody RoomBooking roomBooking) {
         roomBooking = roomBookingService.createRoomBooking(roomId, roomBooking);
-
-        RestTemplate rt = new RestTemplate();
-        rt.getMessageConverters().add(new StringHttpMessageConverter());
-
-        int bookingID = roomBooking.getRoomBookingId();
-        String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
-        ResponseEntity<UserBooking> returns;
-        try {
-            returns = rt.postForEntity(uri, bookingID, UserBooking.class);
-        }
-        catch(Exception e){
-            //TODO rollback saved info
-            throw new ResourceNotFoundException("Cant save to user");
-        }
-        finally {
-            System.out.println("FINALLY");
-        }
+        roomBookingService.saveRoomBookingtoUser(userId, roomBooking);
 
         return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
     }
