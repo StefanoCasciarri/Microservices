@@ -2,7 +2,7 @@ package com.bestgroup.userservice;
 
 
 import com.bestgroup.userservice.entities.User;
-import com.bestgroup.userservice.entities.UserBooking;
+import com.bestgroup.userservice.entities.UserBookings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,68 +26,33 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public List<User> retrieveAllUsers() {
-          return userRepository.findAll();
+    public List<User> getAllUsers() {
+        return userService.retrieveAllUsers();
     }
 
     @PostMapping("/users")
-    public ResponseEntity<Object> createUser(@Valid @RequestBody User user) {
-        User savedUser = userRepository.save(user);
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(savedUser.getId()).toUri();
-
-        return ResponseEntity.created(location).build();
+    public ResponseEntity<Object> postUser(@Valid @RequestBody User user) {
+        return userService.newUser(user);
     }
 
     @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-
-        if(!optionalUser.isPresent()) {
-            throw new UserNotFoundException("id: " + userId);
-        }
-
-        return optionalUser.get();
+    public User getUser(@PathVariable int id) {
+        return userService.retrieveUser(id);
     }
 
     @DeleteMapping("/users/{id}")
-    public void deleteUser(@PathVariable int userId) {
-        userRepository.deleteById(userId);
+    public boolean deleteUser(@PathVariable int id) {
+        return userService.removeUser(id);
     }
 
     @PutMapping("/users/{id}")
-    public void updateUser(@PathVariable int userId, @Valid @RequestBody User updatedUser) {
-            userRepository.findById(userId)
-                .map(user -> {
-                    user.setFirstName(updatedUser.getFirstName());
-                    user.setLastName((updatedUser.getLastName()));
-                    return userRepository.save(user);
-                });
-
+    public void putUser(@PathVariable int id, @Valid @RequestBody User updatedUser) {
+        userService.updateUser(id, updatedUser);
     }
 
     @GetMapping("/users/{id}/bookings")
-    public List<UserBooking> retrieveUserBookings(@PathVariable int userId) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        //TODO communicate with second microservice and retrieving booking information
-        return optionalUser.get().getBookings();
+    public List<UserBooking> getUserBookings(@PathVariable int id) {
+        return userService.retrieveUserBookings(id);
     }
-    //TODO restpoint for other service to add bookings for persons
-
-    @PostMapping("/users/{id}/bookings")
-    public UserBooking addUserBooking(@PathVariable int userId, @RequestParam int bookingID) {
-
-
-        Optional<User> optionalUser = userRepository.findById(userId);
-            if(!optionalUser.isPresent()) {
-                throw new UserNotFoundException("id: " + id);
-            }
-
-        UserBooking booking = new UserBooking(bookingID,optionalUser.get());
-        //TODO communicate with second microservice and retrieving booking information
-        return optionalUser.get().getBookings();
-    }
+    //TODO restpoint for other service to add bookings for persons 
 }
