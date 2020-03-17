@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -19,7 +20,7 @@ public class RoomBookingController {
 
 
     @PostMapping("/conference-rooms/{roomId}/bookings")
-    public ResponseEntity<RoomBooking> createRoomBooking(@PathVariable Integer roomId, @RequestBody RoomBooking roomBooking) {
+    public ResponseEntity<RoomBooking> createRoomBooking(@PathVariable Integer roomId, @Valid @RequestBody RoomBooking roomBooking) {
         roomBooking = roomBookingService.createRoomBooking(roomId, roomBooking);
         return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
     }

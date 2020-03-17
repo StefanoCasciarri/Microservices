@@ -15,14 +15,19 @@ public class RoomBookingService {
 
     private RoomBookingRepository roomBookingRepository;
     private ConferenceRoomRepository conferenceRoomRepository;
+    private ValidationService validationService;
 
     @Autowired
-    public RoomBookingService(RoomBookingRepository roomBookingRepository,ConferenceRoomRepository conferenceRoomRepository) {
+    public RoomBookingService(RoomBookingRepository roomBookingRepository,
+                              ConferenceRoomRepository conferenceRoomRepository,
+                              ValidationService validationService) {
         this.roomBookingRepository = roomBookingRepository;
         this.conferenceRoomRepository = conferenceRoomRepository;
+        this.validationService = validationService;
     }
 
     public RoomBooking createRoomBooking(Integer roomId, RoomBooking roomBooking) {
+        validationService.isDurationValid(roomBooking);
 
         roomBookingRepository.save(roomBooking);
 

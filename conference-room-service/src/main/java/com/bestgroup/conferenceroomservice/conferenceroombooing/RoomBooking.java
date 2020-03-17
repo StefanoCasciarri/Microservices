@@ -28,4 +28,6 @@ public class RoomBooking {
 
     @Future(message = "Date should be future")
     private Date endDateTime;
+
+    //TODO validate dates, validate room not occupied
 }
