@@ -3,13 +3,11 @@ package com.bestgroup.userservice;
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.swing.text.html.Option;
 import java.net.URI;
 import java.util.List;
 import java.util.Optional;
@@ -87,4 +85,7 @@ public class UserService {
        return bookingRepository.save(new UserBooking(bookingId,user.get()));
     }
 
+    public List<UserBooking> getUserBookings(List<Integer> bookings) {
+        return  bookingRepository.findAllById(bookings);
+    }
 }
