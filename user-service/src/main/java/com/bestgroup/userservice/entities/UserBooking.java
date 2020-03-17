@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
 @Entity
-public class UserBookings {
+public class UserBooking {
 
     @Id
     @Positive
@@ -22,9 +22,9 @@ public class UserBookings {
     private User userId;
 
 
-    public UserBookings() {
+    public UserBooking() {
     }
-    public UserBookings(int bookingId, User userId) {
+    public UserBooking(int bookingId, User userId) {
       this.userId = userId;
       this.bookingId = bookingId;
     }

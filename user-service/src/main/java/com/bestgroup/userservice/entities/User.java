@@ -30,7 +30,7 @@ public class User {
     @JsonBackReference
     @OneToMany( fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "userId",
               orphanRemoval = true)
-    private List<UserBookings> bookings;
+    private List<UserBooking> bookings;
 
 
     public User() {}
@@ -70,11 +70,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public List<UserBookings> getBookings() {
+    public List<UserBooking> getBookings() {
         return bookings;
     }
 
-    public void setBookings(List<UserBookings> bookings) {
+    public void setBookings(List<UserBooking> bookings) {
         this.bookings = bookings;
     }
 }
