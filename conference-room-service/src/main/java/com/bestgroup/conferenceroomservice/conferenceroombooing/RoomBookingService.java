@@ -73,6 +73,7 @@ public class RoomBookingService {
     }
 
     private void deleteRoomBooking(RoomBooking roomBooking) {
+        //first delete roomBooking form conferenceRoom collection
         deleteRoomBookingfromConferenceRoom(roomBooking);
         roomBookingRepository.delete(roomBooking);
     }
@@ -81,6 +82,5 @@ public class RoomBookingService {
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomBooking.getConferenceRoom().getRoomId());
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         conferenceRoom.get().getRoomBookings().remove(roomBooking);
-        conferenceRoomRepository.save(conferenceRoom.get()); //TODO is this neccesary?
     }
 }
