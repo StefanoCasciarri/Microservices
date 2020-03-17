@@ -1,53 +1,56 @@
 package com.bestgroup.userservice;
 
 
+import com.bestgroup.userservice.entities.User;
+import com.bestgroup.userservice.entities.UserBookings;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.util.Iterator;
+import javax.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
 public class UserController {
 
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Autowired
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping("/users")
-    public List<User> retrieveAllUsers() {
-        return userRepository.findAll();
+    public List<User> getAllUsers() {
+        return userService.retrieveAllUsers();
     }
 
     @PostMapping("/users")
-    public void createUser(@RequestBody User user) {
-        User savedUser = userRepository.save(user);
+    public ResponseEntity<Object> postUser(@Valid @RequestBody User user) {
+        return userService.newUser(user);
     }
 
     @GetMapping("/users/{id}")
-    public User retrieveUser(@PathVariable int id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-        return optionalUser.get();
+    public User getUser(@PathVariable int id) {
+        return userService.retrieveUser(id);
     }
 
     @DeleteMapping("/users/{id}")
-    public void deleteUser(@PathVariable int id) {
-        userRepository.deleteById(id);
+    public boolean deleteUser(@PathVariable int id) {
+        return userService.removeUser(id);
     }
 
     @PutMapping("/users/{id}")
-    public void updateUser(@PathVariable int id, @RequestBody User updatedUser) {
-            userRepository.findById(id)
-                .map(user -> {
-                    user.setFirstName(updatedUser.getFirstName());
-                    user.setLastName((updatedUser.getLastName()));
-                    return userRepository.save(user);
-                });
-
+    public void putUser(@PathVariable int id, @Valid @RequestBody User updatedUser) {
+        userService.updateUser(id, updatedUser);
     }
 
+    @GetMapping("/users/{id}/bookings")
+    public List<UserBookings> getUserBookings(@PathVariable int id) {
+        return userService.retrieveUserBookings(id);
+    }
+    //TODO restpoint for other service to add bookings for persons 
 }
