@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -16,7 +17,7 @@ public class ConferenceRoomController {
     }
 
     @PostMapping("/conference-rooms")
-    public ResponseEntity<ConferenceRoom> create(@RequestBody ConferenceRoom room){ roomService.createConferenceRoom(room);
+    public ResponseEntity<ConferenceRoom> create(@Valid @RequestBody ConferenceRoom room){ roomService.createConferenceRoom(room);
         return new ResponseEntity<ConferenceRoom>(room, HttpStatus.CREATED);
     }
 
@@ -36,7 +37,7 @@ public class ConferenceRoomController {
     }
 
     @PutMapping("/conference-rooms/{roomId}")
-    public ResponseEntity<ConferenceRoom> update(@PathVariable Integer roomId, @RequestBody ConferenceRoom room){
+    public ResponseEntity<ConferenceRoom> update(@PathVariable Integer roomId, @Valid @RequestBody ConferenceRoom room){
         room = roomService.update(roomId,room);
         return new ResponseEntity<ConferenceRoom>(room, HttpStatus.CREATED);
     }
