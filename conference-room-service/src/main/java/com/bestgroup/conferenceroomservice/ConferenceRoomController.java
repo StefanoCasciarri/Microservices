@@ -25,19 +25,19 @@ public class ConferenceRoomController {
         return roomService.getAllRooms();
     }
 
-    @GetMapping("/conference-rooms/{id}")
-    public ConferenceRoom getRoomById(@PathVariable Integer id){
-        return roomService.getRoomById(id);
+    @GetMapping("/conference-rooms/{roomId}")
+    public ConferenceRoom getRoomById(@PathVariable Integer roomId){
+        return roomService.getRoomById(roomId);
     }
 
-    @DeleteMapping("/conference-rooms/{id}")
-    public void deleteRoomById(@PathVariable Integer id){
-         roomService.deleteRoomById(id);
+    @DeleteMapping("/conference-rooms/{roomId}")
+    public void deleteRoomById(@PathVariable Integer roomId){
+         roomService.deleteRoomById(roomId);
     }
 
-    @PutMapping("/conference-rooms/{id}")
-    public ResponseEntity<ConferenceRoom> update(@PathVariable Integer id, @RequestBody ConferenceRoom room){
-        room = roomService.update(id,room);
+    @PutMapping("/conference-rooms/{roomId}")
+    public ResponseEntity<ConferenceRoom> update(@PathVariable Integer roomId, @RequestBody ConferenceRoom room){
+        room = roomService.update(roomId,room);
         return new ResponseEntity<ConferenceRoom>(room, HttpStatus.CREATED);
     }
 

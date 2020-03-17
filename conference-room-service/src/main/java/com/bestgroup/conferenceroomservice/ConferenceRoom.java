@@ -8,8 +8,8 @@ public class ConferenceRoom  {
 
     @Id
     @Column(name = "roomId")
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private int id;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private int roomId;
 
     @Column(name = "floor")
     private int floor;
@@ -29,8 +29,8 @@ public class ConferenceRoom  {
         this.size = size;
     }
 
-    public int getId() {
-        return id;
+    public int getRoomId() {
+        return roomId;
     }
 
     public int getFloor() {
@@ -60,7 +60,7 @@ public class ConferenceRoom  {
     @Override
     public String toString() {
         return "ConferenceRoom{" +
-                "id=" + id +
+                "id=" + roomId +
                 ", floor=" + floor +
                 ", name='" + name + '\'' +
                 ", size=" + size +
