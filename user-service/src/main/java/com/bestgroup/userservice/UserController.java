@@ -2,16 +2,13 @@ package com.bestgroup.userservice;
 
 
 import com.bestgroup.userservice.entities.User;
-import com.bestgroup.userservice.entities.UserBookings;
+import com.bestgroup.userservice.entities.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 public class UserController {
@@ -19,8 +16,8 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserService service) {
+        this.userService=service;
     }
 
     @GetMapping("/users")
@@ -49,8 +46,19 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}/bookings")
-    public List<UserBookings> getUserBookings(@PathVariable int id) {
+    public List<UserBooking> getUserBookings(@PathVariable int id) {
         return userService.retrieveUserBookings(id);
     }
-    //TODO restpoint for other service to add bookings for persons 
+    //TODO restpoint for other service to add bookings for persons
+
+    @PostMapping("/users/{id}/bookings")
+    public ResponseEntity<UserBooking> addUserBooking(@PathVariable int id, @RequestParam int bookingID) {
+        UserBooking booking = userService.addUserBooking( id, bookingID);
+        return new ResponseEntity<>(booking, HttpStatus.CREATED);
+    }
+
+    @GetMapping("users/bookings/")
+    public List<UserBooking> getUserBookings(@RequestParam List<Integer> bookings){
+        return userService.getUserBookings(bookings);
+    }
 }

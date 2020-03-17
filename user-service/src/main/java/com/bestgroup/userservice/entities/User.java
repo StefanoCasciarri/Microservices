@@ -1,11 +1,10 @@
 package com.bestgroup.userservice.entities;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.util.List;
 
@@ -27,10 +26,10 @@ public class User {
     private String lastName;
 
 
-    @JsonBackReference
+    @JsonIgnore
     @OneToMany( fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "userId",
               orphanRemoval = true)
-    private List<UserBookings> bookings;
+    private List<UserBooking> bookings;
 
 
     public User() {}
@@ -70,11 +69,11 @@ public class User {
         this.lastName = lastName;
     }
 
-    public List<UserBookings> getBookings() {
+    public List<UserBooking> getBookings() {
         return bookings;
     }
 
-    public void setBookings(List<UserBookings> bookings) {
+    public void setBookings(List<UserBooking> bookings) {
         this.bookings = bookings;
     }
 }
