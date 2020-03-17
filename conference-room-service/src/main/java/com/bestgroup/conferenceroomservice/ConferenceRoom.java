@@ -1,6 +1,7 @@
 package com.bestgroup.conferenceroomservice;
 
 import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBooking;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -33,7 +34,7 @@ public class ConferenceRoom  {
     @Column(name ="size")
     private Integer size;
 
-
+    @JsonIgnore
     @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)//, mappedBy = "conferenceRoom"
     private List<RoomBooking> roomBookings;
 

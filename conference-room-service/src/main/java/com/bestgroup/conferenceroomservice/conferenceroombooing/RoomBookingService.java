@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,10 +34,26 @@ public class RoomBookingService {
 
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(id);
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
+
+        List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
+        //getUserInfo(roomBookings);TODO finish this. parameter bookings does not work
+
         //TODO: call USER microservice to get info about user connected with booking
         //TODO: then change the retrun structure
 
         return conferenceRoom.get().getRoomBookings();
+    }
+
+    private void getUserInfo(List<RoomBooking> roomBookings) {
+        //TODO finish this. parameter bookings does not work
+        List<Integer> bookings = new ArrayList<>();// list of bookings Ids
+        roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
+
+        RestTemplate restTemplate = new RestTemplate();
+        String uri = new String("http://localhost:8090/users/bookings/");
+        ResponseEntity<UserBooking[]> userBookings= restTemplate.getForEntity(uri,  UserBooking[].class, bookings);
+
+
     }
 
 

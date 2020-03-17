@@ -15,7 +15,7 @@ public class RoomBooking {
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int roomBookingId;
 
-    @JsonIgnore
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="roomId")
     private ConferenceRoom conferenceRoom;
