@@ -47,17 +47,16 @@ public class RoomBookingService {
 
     public List<RoomBooking> getRoomBookings(int id) {
 
-        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(id);
-        optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
+        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(id);
+        conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         //TODO: call USER microservice to get info about user connected with booking
         //TODO: then change the retrun structure
 
-        return optionalConferenceRoom.get().getRoomBookings();
+        return conferenceRoom.get().getRoomBookings();
     }
 
     public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
         RestTemplate restTemplate = new RestTemplate();
-  ///      restTemplate.getMessageConverters().add(new StringHttpMessageConverter());//TODO is that necessary?
 
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
@@ -66,12 +65,22 @@ public class RoomBookingService {
             userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
         }
         catch(Exception e){
-            //TODO rollback saved info
+            //if 404 : cant save to user then delete room booking
+            deleteRoomBooking(roomBooking);
             throw new ResourceNotFoundException("Cant save to user");
         }
-        finally {
-            System.out.println("FINALLY");
-        }
         return  userBookingResponseEntity.getBody();
+    }
+
+    private void deleteRoomBooking(RoomBooking roomBooking) {
+        deleteRoomBookingfromConferenceRoom(roomBooking);
+        roomBookingRepository.delete(roomBooking);
+    }
+
+    private void deleteRoomBookingfromConferenceRoom(RoomBooking roomBooking) {
+        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomBooking.getConferenceRoom().getRoomId());
+        conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
+        conferenceRoom.get().getRoomBookings().remove(roomBooking);
+        conferenceRoomRepository.save(conferenceRoom.get()); //TODO is this neccesary?
     }
 }
