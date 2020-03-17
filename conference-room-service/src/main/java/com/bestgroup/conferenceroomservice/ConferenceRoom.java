@@ -1,7 +1,11 @@
 package com.bestgroup.conferenceroomservice;
 
+import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBooking;
+
 import javax.persistence.*;
 import javax.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="conferenceRooms")
@@ -29,6 +33,10 @@ public class ConferenceRoom  {
     @Column(name ="size")
     private Integer size;
 
+
+    @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)//, mappedBy = "conferenceRoom"
+    private List<RoomBooking> roomBookings;
+
     public ConferenceRoom() {
     }
 
@@ -36,6 +44,7 @@ public class ConferenceRoom  {
         this.floor = floor;
         this.name = name;
         this.size = size;
+        this.roomBookings = new ArrayList<>();
     }
 
     public int getRoomId() {
@@ -66,6 +75,13 @@ public class ConferenceRoom  {
         this.size = size;
     }
 
+    public List<RoomBooking> getRoomBookings() {
+        return roomBookings;
+    }
+    public void addRoomBookings(RoomBooking roomBooking) {
+        this.roomBookings.add(roomBooking);
+        //TODO: roomBooking.setconferenceRoom(this);
+    }
     @Override
     public String toString() {
         return "ConferenceRoom{" +
