@@ -3,14 +3,17 @@ package com.bestgroup.conferenceroomservice.conferenceroombooing;
 import com.bestgroup.conferenceroomservice.ConferenceRoom;
 import com.bestgroup.conferenceroomservice.ConferenceRoomRepository;
 import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
+import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +39,10 @@ public class RoomBookingService {
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
 
         List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
-        //getUserInfo(roomBookings);TODO finish this. parameter bookings does not work
+        List<UserBooking>  userBookings = getUserInfo(roomBookings);
+        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
+
+        //TODO finish this. create RoomBookingInfo list wiht userBooing info
 
         //TODO: call USER microservice to get info about user connected with booking
         //TODO: then change the retrun structure
@@ -44,15 +50,20 @@ public class RoomBookingService {
         return conferenceRoom.get().getRoomBookings();
     }
 
-    private void getUserInfo(List<RoomBooking> roomBookings) {
+    private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
         //TODO finish this. parameter bookings does not work
         List<Integer> bookings = new ArrayList<>();// list of bookings Ids
         roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
 
         RestTemplate restTemplate = new RestTemplate();
         String uri = new String("http://localhost:8090/users/bookings/");
-        ResponseEntity<UserBooking[]> userBookings= restTemplate.getForEntity(uri,  UserBooking[].class, bookings);
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uri)
+                .queryParam("bookings", bookings);
 
+        ResponseEntity<UserBooking[]> responseEntity= restTemplate.getForEntity(builder.toUriString(),  UserBooking[].class);
+        List<UserBooking>  userBookings = Arrays.asList(responseEntity.getBody());
+        return userBookings;
 
     }
 
