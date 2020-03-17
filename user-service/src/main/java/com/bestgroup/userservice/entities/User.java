@@ -2,6 +2,7 @@ package com.bestgroup.userservice.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -27,7 +28,7 @@ public class User {
     private String lastName;
 
 
-    @JsonBackReference
+    @JsonIgnore
     @OneToMany( fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "userId",
               orphanRemoval = true)
     private List<UserBooking> bookings;

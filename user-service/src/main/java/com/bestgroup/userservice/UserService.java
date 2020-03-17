@@ -1,8 +1,9 @@
 package com.bestgroup.userservice;
 
 import com.bestgroup.userservice.entities.User;
-import com.bestgroup.userservice.entities.UserBookings;
+import com.bestgroup.userservice.entities.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,10 +18,12 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserBookingRepository bookingRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserBookingRepository bookingRepository) {
         this.userRepository = userRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<User> retrieveAllUsers() {
@@ -70,9 +73,18 @@ public class UserService {
         return null;
     }
 
-    public List<UserBookings> retrieveUserBookings(@PathVariable int id) {
+    public List<UserBooking> retrieveUserBookings(@PathVariable int id) {
         Optional<User> optionalUser = userRepository.findById(id);
         //TODO communicate with second microservice and retrieving booking information
         return optionalUser.get().getBookings();
     }
+
+    public UserBooking addUserBooking(int userId, int bookingId ){
+       Optional<User>  user = userRepository.findById(userId);
+       if(!user.isPresent()) {
+           throw new UserNotFoundException("id: " + userId);
+       }
+       return bookingRepository.save(new UserBooking(bookingId,user.get()));
+    }
+
 }

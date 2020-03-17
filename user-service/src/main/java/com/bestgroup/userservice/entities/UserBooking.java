@@ -13,12 +13,9 @@ import javax.validation.constraints.Positive;
 public class UserBooking {
 
     @Id
-    @Positive
     private int bookingId;
 
     @ManyToOne
-    @JsonManagedReference
-    @Positive
     private User userId;
 
 

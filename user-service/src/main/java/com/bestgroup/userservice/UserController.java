@@ -2,8 +2,9 @@ package com.bestgroup.userservice;
 
 
 import com.bestgroup.userservice.entities.User;
-import com.bestgroup.userservice.entities.UserBookings;
+import com.bestgroup.userservice.entities.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -16,13 +17,11 @@ import java.util.Optional;
 @RestController
 public class UserController {
 
-    private UserRepository userRepository;
-    private UserBookingRepository bookingRepository;
+    private UserService userService;
 
     @Autowired
-    public UserController(UserRepository userRepository, UserBookingRepository bookingRepository) {
-        this.userRepository = userRepository;
-        this.bookingRepository = bookingRepository;
+    public UserController(UserService service) {
+        this.userService=service;
     }
 
     @GetMapping("/users")
@@ -54,5 +53,11 @@ public class UserController {
     public List<UserBooking> getUserBookings(@PathVariable int id) {
         return userService.retrieveUserBookings(id);
     }
-    //TODO restpoint for other service to add bookings for persons 
+    //TODO restpoint for other service to add bookings for persons
+
+    @PostMapping("/users/{id}/bookings")
+    public ResponseEntity<UserBooking> addUserBooking(@PathVariable int id, @RequestParam int bookingID) {
+        UserBooking booking = userService.addUserBooking( id, bookingID);
+        return new ResponseEntity<>(booking, HttpStatus.CREATED);
+    }
 }
