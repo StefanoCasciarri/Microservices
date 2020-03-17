@@ -7,7 +7,6 @@ import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,18 +29,10 @@ public class RoomBookingService {
         this.validationService = validationService;
     }
 
-    public RoomBooking createRoomBooking(Integer roomId, RoomBooking roomBooking) {
+    public RoomBooking createRoomBooking(RoomBooking roomBooking) {
         validationService.isDurationValid(roomBooking);
-
         roomBookingRepository.save(roomBooking);
 
-        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
-        optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
-
-        optionalConferenceRoom.get().addRoomBookings(roomBooking);
-        conferenceRoomRepository.save(optionalConferenceRoom.get());
-
-        //TODO: ask guys if this will be called from USER Microservice or by enduser
         return roomBooking;
     }
 
@@ -55,6 +46,16 @@ public class RoomBookingService {
         return conferenceRoom.get().getRoomBookings();
     }
 
+    public void addRoomBookingstoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
+        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
+        optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
+        ConferenceRoom conferenceRoom = optionalConferenceRoom.get();
+        conferenceRoom.getRoomBookings().add(roomBooking);
+        roomBooking.setConferenceRoom(conferenceRoom);
+
+        conferenceRoomRepository.save(conferenceRoom);
+    }
+
     public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
         RestTemplate restTemplate = new RestTemplate();
 
@@ -62,6 +63,7 @@ public class RoomBookingService {
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
         ResponseEntity<UserBooking> userBookingResponseEntity;
         try {
+            //TODO maybe?: post For Entity doesnt work without Object parameter, but call doesnt see bookingID Request parameter so now its put into uri.
             userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
         }
         catch(Exception e){

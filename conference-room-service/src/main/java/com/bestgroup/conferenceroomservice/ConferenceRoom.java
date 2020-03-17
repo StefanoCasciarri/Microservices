@@ -78,10 +78,6 @@ public class ConferenceRoom  {
     public List<RoomBooking> getRoomBookings() {
         return roomBookings;
     }
-    public void addRoomBookings(RoomBooking roomBooking) {
-        this.roomBookings.add(roomBooking);
-        roomBooking.setConferenceRoom(this);
-    }
 
     @Override
     public String toString() {

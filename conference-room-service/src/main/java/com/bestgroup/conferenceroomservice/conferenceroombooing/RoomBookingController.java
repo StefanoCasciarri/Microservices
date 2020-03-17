@@ -1,14 +1,9 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
-import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
-import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -28,7 +23,8 @@ public class RoomBookingController {
     public ResponseEntity<RoomBooking> createRoomBooking(@PathVariable Integer roomId,
                                                          @RequestParam Integer userId,
                                                          @Valid @RequestBody RoomBooking roomBooking) {
-        roomBooking = roomBookingService.createRoomBooking(roomId, roomBooking);
+        roomBookingService.createRoomBooking(roomBooking);
+        roomBookingService.addRoomBookingstoConferenceRoom(roomId, roomBooking);
         roomBookingService.saveRoomBookingtoUser(userId, roomBooking);
 
         return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
