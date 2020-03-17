@@ -22,16 +22,19 @@ public class RoomBookingService {
         this.conferenceRoomRepository = conferenceRoomRepository;
     }
 
-    public void createRoomBooking(RoomBooking roomBooking) {
+    public RoomBooking createRoomBooking(Integer roomId, RoomBooking roomBooking) {
+
         roomBookingRepository.save(roomBooking);
 
-        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomBooking.getRoomId());
+        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
         optionalConferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
+
         optionalConferenceRoom.get().addRoomBookings(roomBooking);
         conferenceRoomRepository.save(optionalConferenceRoom.get());
 
         //TODO: ask guys if this will be called from USER Microservice or by enduser
-         }
+        return roomBooking;
+    }
 
     public List<RoomBooking> getRoomBookings(int id) {
 

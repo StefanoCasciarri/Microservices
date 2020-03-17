@@ -1,11 +1,10 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
+import com.bestgroup.conferenceroomservice.ConferenceRoom;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.Min;
@@ -15,16 +14,14 @@ import java.util.Date;
 @Data
 public class RoomBooking {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private int roomBookingId;
 
-//  TODO: it will look like that after ConferenceRoom is ready
-//          but then Dto is needed
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="roomId")
-//    private ConferenceRoom conferenceRoom;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="roomId")
+    private ConferenceRoom conferenceRoom;
 
-    private int roomId;
 
     @Future(message = "Date should be future")
     private Date startDateTime;

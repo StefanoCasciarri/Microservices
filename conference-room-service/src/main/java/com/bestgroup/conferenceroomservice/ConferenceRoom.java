@@ -71,8 +71,9 @@ public class ConferenceRoom  {
     }
     public void addRoomBookings(RoomBooking roomBooking) {
         this.roomBookings.add(roomBooking);
-        //TODO: roomBooking.setconferenceRoom(this);
+        roomBooking.setConferenceRoom(this);
     }
+
     @Override
     public String toString() {
         return "ConferenceRoom{" +
