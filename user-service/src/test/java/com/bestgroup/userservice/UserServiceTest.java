@@ -138,9 +138,43 @@ class UserServiceTest {
 
     @Test
     void addUserBooking() {
+        User user = new User("John", "Doe");
+        when(userRepository.findById(anyInt()))
+                .thenReturn(Optional.ofNullable(user));
+
+        when(userBookingRepository.save(any(UserBooking.class))).thenReturn(new UserBooking(3, user));
+
+        UserBooking userBooking = userService.addUserBooking(94, 3);
+
+        assertNotNull(userBooking);
+        assertEquals(3, userBooking.getBookingId());
+        assertEquals(0, userBooking.getUserId().getId());
+    }
+
+    @Test
+    void addUserBookingThrowUserNotFoundException() {
+        when(userRepository.findById(anyInt()))
+                .thenReturn(Optional.ofNullable(null));
+
+        assertThrows(UserNotFoundException.class,
+                () -> userService.addUserBooking(32, 8));
     }
 
     @Test
     void getUserBookings() {
+        List<UserBooking> userBookingsList = new ArrayList<>();
+        userBookingsList.add(new UserBooking(4, new User("John", "Doe")));
+        userBookingsList.add(new UserBooking(8, new User("Miranda", "Wall")));
+
+        when(userBookingRepository.findAllById(any(List.class))).thenReturn(userBookingsList);
+
+        List<Integer> bookingList = new ArrayList<>();
+
+        List<UserBooking> mockedList = userService.getUserBookings(bookingList);
+
+        assertNotNull(mockedList);
+        assertEquals(2, mockedList.size());
+        assertEquals(4, mockedList.get(0).getBookingId());
+        assertEquals(8, mockedList.get(1).getBookingId());
     }
 }

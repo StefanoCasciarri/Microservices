@@ -80,7 +80,7 @@ public class UserService {
     }
 
     public UserBooking addUserBooking(int userId, int bookingId ){
-       Optional<User>  optionalUser = userRepository.findById(userId);
+       Optional<User> optionalUser = userRepository.findById(userId);
        if(!optionalUser.isPresent()) {
            throw new UserNotFoundException("id: " + userId);
        }
