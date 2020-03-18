@@ -3,6 +3,7 @@ package com.bestgroup.userservice;
 
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
+import com.bestgroup.userservice.responseentitystructure.RoomBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -45,11 +46,10 @@ public class UserController {
         userService.updateUser(id, updatedUser);
     }
 
-    @GetMapping("/users/{id}/bookings")
-    public List<UserBooking> getUserBookings(@PathVariable int id) {
-        return userService.retrieveUserBookings(id);
+    @GetMapping("/users/{userId}/bookings")
+    public List<RoomBooking> getUserBookings(@PathVariable int userId) {
+        return userService.retrieveUserBookings(userId);
     }
-    //TODO restpoint for other service to add bookings for persons
 
     @PostMapping("/users/{id}/bookings")
     public ResponseEntity<UserBooking> addUserBooking(@PathVariable int id, @RequestParam int bookingID) {

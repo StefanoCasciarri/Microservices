@@ -8,6 +8,8 @@ import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -81,7 +83,7 @@ public class RoomBookingService {
 
 
     public RoomBookingInfo createRoomBooking(Integer roomId, Integer userId, RoomBooking roomBooking) {
-
+        validateRoomBookingParameters(roomId, roomBooking);
         saveRoomBooking(roomBooking);
         saveRoomBookingtoConferenceRoom(roomId, roomBooking);
         UserBooking userBooking = saveRoomBookingtoUser(userId, roomBooking);
@@ -89,8 +91,14 @@ public class RoomBookingService {
 
     }
 
-    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
+    public boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
+        validationService.isRoomExist(roomId);
         validationService.isDurationValid(roomBooking);
+        validationService.isRoomAvailable(roomId, roomBooking);
+        return true;
+    }
+
+    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
         roomBookingRepository.save(roomBooking);
 
         return roomBooking;
@@ -99,7 +107,7 @@ public class RoomBookingService {
     public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
         Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
         ConferenceRoom conferenceRoom;
-        if(optionalConferenceRoom.isPresent()){
+        if(optionalConferenceRoom.isPresent()){//check not nesecary when used validationService.isRoomExist(roomId);
             conferenceRoom = optionalConferenceRoom.get();
             conferenceRoom.getRoomBookings().add(roomBooking);
             roomBooking.setConferenceRoom(conferenceRoom);
@@ -139,5 +147,11 @@ public class RoomBookingService {
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomBooking.getConferenceRoom().getRoomId());
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         conferenceRoom.get().getRoomBookings().remove(roomBooking);
+    }
+
+    public List<RoomBooking> getBookingsInfo(List<Integer> bookings) {
+
+        List<RoomBooking> roomBookings = roomBookingRepository.findAllById(bookings);
+        return roomBookings;
     }
 }
