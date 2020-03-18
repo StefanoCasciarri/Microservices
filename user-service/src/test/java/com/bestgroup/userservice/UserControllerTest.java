@@ -31,7 +31,7 @@ class UserControllerTest {
 
 
     @Test
-    void getAllUsers() {
+    void getAllUsersReturnNonEmptyList() {
 
         User user1 = new User("John", "Doe");
         User user2 = new User("Anna", "Smith");
@@ -67,7 +67,7 @@ class UserControllerTest {
     }
 
     @Test
-    void getUser() {
+    void getExistingUserByIdReturnUser() {
 
         when(userService.retrieveUser(anyInt())).thenReturn(new User("Thomas", "Duke"));
 
