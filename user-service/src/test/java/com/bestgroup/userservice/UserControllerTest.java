@@ -7,13 +7,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.print.attribute.ResolutionSyntax;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -104,23 +102,6 @@ class UserControllerTest {
 
     }
 
-    @Test
-    void getUserBookings() {
-
-        List<UserBooking> userBookings = new ArrayList<>();
-        userBookings.add(new UserBooking(3,new User("John","Doe")));
-        userBookings.add(new UserBooking(8,new User("Miranda","Wall")));
-
-        when(userService.retrieveUserBookings(anyInt())).thenReturn(userBookings);
-
-        List<UserBooking> mockedList = userController.getUserBookings(33);
-
-        assertNotNull(mockedList);
-        assertEquals(2, mockedList.size());
-        assertEquals(3, mockedList.get(0).getBookingId());
-        assertEquals(8, mockedList.get(1).getBookingId());
-
-    }
 
     @Test
     void addUserBooking() {
@@ -137,6 +118,20 @@ class UserControllerTest {
     }
 
     @Test
-    void testGetUserBookings() {
+    void getUserBookings() {
+
+        List<UserBooking> userBookings = new ArrayList<>();
+        userBookings.add(new UserBooking(3,new User("John","Doe")));
+        userBookings.add(new UserBooking(8,new User("Miranda","Wall")));
+
+        when(userService.retrieveUserBookings(anyInt())).thenReturn(userBookings);
+
+        List<UserBooking> mockedList = userController.getUserBookings(33);
+
+        assertNotNull(mockedList);
+        assertEquals(2, mockedList.size());
+        assertEquals(3, mockedList.get(0).getBookingId());
+        assertEquals(8, mockedList.get(1).getBookingId());
+
     }
 }
