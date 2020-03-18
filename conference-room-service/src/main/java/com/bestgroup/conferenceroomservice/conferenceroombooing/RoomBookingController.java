@@ -1,5 +1,6 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
+import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +21,17 @@ public class RoomBookingController {
 
 
     @PostMapping("/conference-rooms/{roomId}/bookings")
-    public ResponseEntity<RoomBooking> createRoomBooking(@PathVariable Integer roomId,
+    public ResponseEntity<RoomBookingInfo> createRoomBooking(@PathVariable Integer roomId,
                                                          @RequestParam Integer userId,
                                                          @Valid @RequestBody RoomBooking roomBooking) {
-        roomBookingService.createRoomBooking(roomBooking);
-        roomBookingService.saveRoomBookingtoConferenceRoom(roomId, roomBooking);
-        roomBookingService.saveRoomBookingtoUser(userId, roomBooking);
+        RoomBookingInfo roomBookingInfo = roomBookingService.createRoomBooking(roomId, userId, roomBooking);
 
-        return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
+        return new ResponseEntity<RoomBookingInfo>(roomBookingInfo, HttpStatus.CREATED);
     }
 
-    @GetMapping("/conference-rooms/{id}/bookings")
-    public List<RoomBooking> getRoomBookings(@PathVariable int id) {
+    @GetMapping("/conference-rooms/{roomId}/bookings")
+    public List<RoomBookingInfo> getRoomBookings(@PathVariable int roomId) {
 
-        return roomBookingService.getRoomBookings(id);
+        return roomBookingService.getRoomBookingsInfo(roomId);
     }
 }
