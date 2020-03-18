@@ -2,6 +2,8 @@ package com.bestgroup.userservice;
 
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
+import com.bestgroup.userservice.repository.UserBookingRepository;
+import com.bestgroup.userservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,7 @@ public class UserService {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedUser.getId()).toUri();
+                .buildAndExpand(savedUser.getUserId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
