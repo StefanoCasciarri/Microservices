@@ -21,7 +21,7 @@ public class RoomBooking {
     private int roomBookingId;
 
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name="roomId")
     @Setter
     private ConferenceRoom conferenceRoom;
