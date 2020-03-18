@@ -40,13 +40,10 @@ public class UserService {
     }
 
     public User retrieveUser(int id) {
-        Optional<User> optionalUser = userRepository.findById(id);
+        Optional<User> userWrappedInOptional = userRepository.findById(id);
+        userWrappedInOptional.orElseThrow(() -> new UserNotFoundException("id: " + id));
 
-        if(!optionalUser.isPresent()) {
-            throw new UserNotFoundException("id: " + id);
-        }
-
-        return optionalUser.get();
+        return userWrappedInOptional.get();
     }
 
     public boolean removeUser(int id) {
@@ -68,7 +65,7 @@ public class UserService {
                     userRepository.save(user);
                     return user;
                 });
-        return null;
+        return updatedUser;
     }
 
     public List<UserBooking> retrieveUserBookings(@PathVariable int id) {

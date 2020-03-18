@@ -41,8 +41,8 @@ public class UserController {
     }
 
     @PutMapping("/users/{id}")
-    public void putUser(@PathVariable int id, @Valid @RequestBody User updatedUser) {
-        userService.updateUser(id, updatedUser);
+    public User putUser(@PathVariable int id, @Valid @RequestBody User updatedUser) {
+        return userService.updateUser(id, updatedUser);
     }
 
     @GetMapping("/users/{id}/bookings")
