@@ -8,6 +8,8 @@ import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -139,5 +141,11 @@ public class RoomBookingService {
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomBooking.getConferenceRoom().getRoomId());
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         conferenceRoom.get().getRoomBookings().remove(roomBooking);
+    }
+
+    public List<RoomBooking> getBookingsInfo(List<Integer> bookings) {
+
+        List<RoomBooking> roomBookings = roomBookingRepository.findAllById(bookings);
+        return roomBookings;
     }
 }
