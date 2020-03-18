@@ -2,6 +2,7 @@ package com.bestgroup.userservice;
 
 
 import com.bestgroup.userservice.entities.User;
+import com.bestgroup.userservice.entities.UserBooking;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -98,4 +99,33 @@ class ValidationTest {
         assertEquals("must not be null", violation.getMessage());
 
     }
+
+    @Test
+    public void validUserBooking() {
+        UserBooking validUserBooking = new UserBooking(4, new User("John", "Doe"));
+        Set<ConstraintViolation<UserBooking>> violations = validator.validate(validUserBooking);
+        assertTrue(violations.isEmpty());
+    }
+
+    @Test
+    public void invalidUserBookingBookingIdNotPositive() {
+        UserBooking validUserBooking = new UserBooking(-1, new User("John", "Doe"));
+        Set<ConstraintViolation<UserBooking>> violations = validator.validate(validUserBooking);
+        assertEquals(1, violations.size());
+
+        ConstraintViolation<UserBooking> violation = violations.iterator().next();
+        assertEquals("must be greater than 0", violation.getMessage());
+    }
+
+    @Test
+    public void invalidUserBookingUserNull() {
+        UserBooking validUserBooking = new UserBooking(4, null);
+        Set<ConstraintViolation<UserBooking>> violations = validator.validate(validUserBooking);
+        assertEquals(1, violations.size());
+
+        ConstraintViolation<UserBooking> violation = violations.iterator().next();
+        assertEquals("must not be null", violation.getMessage());
+    }
+
+
 }
