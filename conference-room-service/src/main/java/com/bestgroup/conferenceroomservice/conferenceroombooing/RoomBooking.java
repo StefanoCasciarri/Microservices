@@ -1,27 +1,40 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
+import com.bestgroup.conferenceroomservice.ConferenceRoom;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import javax.validation.constraints.Future;
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 
 @Entity
-@Data
+@NoArgsConstructor
+@Getter
 public class RoomBooking {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private int roomBookingId;
 
-//  TODO: it will look like that after ConferenceRoom is ready
-//          but then Dto is needed
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name="roomId")
-//    private ConferenceRoom conferenceRoom;
 
-    private int roomId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="roomId")
+    @Setter
+    private ConferenceRoom conferenceRoom;
+
+    @NotNull(message = "Field must not be empty.")
+    @Future(message = "Date should be future")
+    @Setter
     private Date startDateTime;
+
+    @NotNull(message = "Field must not be empty.")
+    @Future(message = "Date should be future")
+    @Setter
     private Date endDateTime;
+
+    //TODO validate room not occupied
 }

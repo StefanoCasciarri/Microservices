@@ -1,20 +1,35 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.entities;
 
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import java.util.List;
 
 
 @Entity
+@Table(name="tuser")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    private int userId;
+
+    @NotNull
+    @Size(min=2, max=30)
     private String firstName;
+
+    @NotNull
+    @Size(min=2, max=30)
     private String lastName;
+
+
+    @JsonIgnore
+    @OneToMany( fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "userId",
+              orphanRemoval = true)
+    private List<UserBooking> bookings;
 
 
     public User() {}
@@ -27,14 +42,15 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "userId=" + userId +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
+                ", bookings=" + bookings +
                 '}';
     }
 
     public int getId() {
-        return id;
+        return userId;
     }
 
     public String getFirstName() {
@@ -51,5 +67,13 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public List<UserBooking> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<UserBooking> bookings) {
+        this.bookings = bookings;
     }
 }

@@ -1,6 +1,10 @@
 package com.bestgroup.conferenceroomservice;
 
 import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBooking;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
@@ -9,6 +13,8 @@ import java.util.List;
 
 @Entity
 @Table(name="conferenceRooms")
+@NoArgsConstructor
+@Getter
 public class ConferenceRoom  {
 
     @Id
@@ -19,26 +25,25 @@ public class ConferenceRoom  {
     @NotNull(message = "Field must not be empty.")
     @Min(value=0)
     @Max(value=50)
-    @Column(name = "floor")
+    @Setter
     private Integer floor;
 
     @NotBlank(message = "Field must not be empty.")
     @Size(min=2,max=30)
-    @Column(name ="name")
+    @Setter
     private String name;
 
     @NotNull(message = "Field must not be empty.")
     @Min(value=1)
     @Max(value=50)
-    @Column(name ="size")
+    @Setter
     private Integer size;
 
-
-    @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL)//, mappedBy = "conferenceRoom"
+    @JsonIgnore
+    @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "conferenceRoom")
+    @Setter
     private List<RoomBooking> roomBookings;
 
-    public ConferenceRoom() {
-    }
 
     public ConferenceRoom(int floor,String name,int size){
         this.floor = floor;
@@ -47,41 +52,8 @@ public class ConferenceRoom  {
         this.roomBookings = new ArrayList<>();
     }
 
-    public int getRoomId() {
-        return roomId;
-    }
 
-    public int getFloor() {
-        return floor;
-    }
 
-    public void setFloor(int floor) {
-        this.floor = floor;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getSize() {
-        return size;
-    }
-
-    public void setSize(int size) {
-        this.size = size;
-    }
-
-    public List<RoomBooking> getRoomBookings() {
-        return roomBookings;
-    }
-    public void addRoomBookings(RoomBooking roomBooking) {
-        this.roomBookings.add(roomBooking);
-        //TODO: roomBooking.setconferenceRoom(this);
-    }
     @Override
     public String toString() {
         return "ConferenceRoom{" +
