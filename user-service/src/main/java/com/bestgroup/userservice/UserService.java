@@ -76,17 +76,6 @@ public class UserService {
         return updatedUser;
     }
 
-
-    public List<UserBooking> retrieveUserBookings(@PathVariable int id) {
-        Optional<User> optionalUser = userRepository.findById(id);
-
-        if(!optionalUser.isPresent()) {
-            throw new UserNotFoundException("id: " + id);
-        }
-
-        //TODO communicate with second microservice and retrieving booking information
-        return optionalUser.get().getBookings();
-
     public List<RoomBooking> retrieveUserBookings(int userId) {
         Optional<User> user = userRepository.findById(userId);
         if(!user.isPresent()) throw new UserNotFoundException("id: " + userId);
