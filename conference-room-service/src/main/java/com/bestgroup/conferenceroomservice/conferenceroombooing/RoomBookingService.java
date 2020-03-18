@@ -24,14 +24,17 @@ public class RoomBookingService {
     private RoomBookingRepository roomBookingRepository;
     private ConferenceRoomRepository conferenceRoomRepository;
     private ValidationService validationService;
+    private RestTemplate restTemplate;
 
     @Autowired
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
                               ConferenceRoomRepository conferenceRoomRepository,
-                              ValidationService validationService) {
+                              ValidationService validationService,
+                              RestTemplate restTemplate) {
         this.roomBookingRepository = roomBookingRepository;
         this.conferenceRoomRepository = conferenceRoomRepository;
         this.validationService = validationService;
+        this.restTemplate = restTemplate;
     }
 
     public List<RoomBookingInfo> getRoomBookingsInfo(int roomId) {
@@ -64,7 +67,6 @@ public class RoomBookingService {
         List<Integer> bookings = new ArrayList<>();// list of bookings Ids
         roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
 
-        RestTemplate restTemplate = new RestTemplate();
         String uri = new String("http://localhost:8090/users/bookings/");
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uri)
@@ -78,7 +80,16 @@ public class RoomBookingService {
     }
 
 
-    public RoomBooking createRoomBooking(RoomBooking roomBooking) {
+    public RoomBookingInfo createRoomBooking(Integer roomId, Integer userId, RoomBooking roomBooking) {
+
+        saveRoomBooking(roomBooking);
+        saveRoomBookingtoConferenceRoom(roomId, roomBooking);
+        UserBooking userBooking = saveRoomBookingtoUser(userId, roomBooking);
+        return new RoomBookingInfo(roomBooking, userBooking.getUserId());
+
+    }
+
+    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
         validationService.isDurationValid(roomBooking);
         roomBookingRepository.save(roomBooking);
 
@@ -103,13 +114,11 @@ public class RoomBookingService {
     }
 
     public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
-        RestTemplate restTemplate = new RestTemplate();
 
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
         ResponseEntity<UserBooking> userBookingResponseEntity;
         try {
-            //TODO maybe?: post For Entity doesnt work without Object parameter, but call doesnt see bookingID Request parameter so now its put into uri.
             userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
         }
         catch(Exception e){
