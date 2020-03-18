@@ -22,13 +22,16 @@ public class ConferenceRoomController {
     }
 
     @GetMapping({"/conference-rooms"})
-    public List<ConferenceRoom> getAllUser(){
-        return roomService.getAllRooms();
+    public ResponseEntity<List<ConferenceRoom>> getAllRooms(){
+
+        List<ConferenceRoom> conferenceRooms = roomService.getAllRooms();
+        return new ResponseEntity<>(conferenceRooms,HttpStatus.OK);
     }
 
     @GetMapping("/conference-rooms/{roomId}")
-    public ConferenceRoom getRoomById(@PathVariable Integer roomId){
-        return roomService.getRoomById(roomId);
+    public ResponseEntity<ConferenceRoom> getRoomById(@PathVariable Integer roomId){
+        ConferenceRoom conferenceRoom = roomService.getRoomById(roomId);
+        return new ResponseEntity<>(conferenceRoom,HttpStatus.OK);
     }
 
     @DeleteMapping("/conference-rooms/{roomId}")
