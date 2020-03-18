@@ -83,7 +83,7 @@ public class RoomBookingService {
 
 
     public RoomBookingInfo createRoomBooking(Integer roomId, Integer userId, RoomBooking roomBooking) {
-
+        validateRoomBookingParameters(roomId, roomBooking);
         saveRoomBooking(roomBooking);
         saveRoomBookingtoConferenceRoom(roomId, roomBooking);
         UserBooking userBooking = saveRoomBookingtoUser(userId, roomBooking);
@@ -91,8 +91,14 @@ public class RoomBookingService {
 
     }
 
-    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
+    public boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
+        validationService.isRoomExist(roomId);
         validationService.isDurationValid(roomBooking);
+        validationService.isRoomAvailable(roomId, roomBooking);
+        return true;
+    }
+
+    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
         roomBookingRepository.save(roomBooking);
 
         return roomBooking;
@@ -101,7 +107,7 @@ public class RoomBookingService {
     public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
         Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
         ConferenceRoom conferenceRoom;
-        if(optionalConferenceRoom.isPresent()){
+        if(optionalConferenceRoom.isPresent()){//check not nesecary when used validationService.isRoomExist(roomId);
             conferenceRoom = optionalConferenceRoom.get();
             conferenceRoom.getRoomBookings().add(roomBooking);
             roomBooking.setConferenceRoom(conferenceRoom);

@@ -103,7 +103,7 @@ public class UserService {
 
     private List<UserBooking> deleteLostUserBookings(List<UserBooking> userBookings, List<RoomBooking> roomBookings) {
         //delete those userBookings that their id can not be found in roomBookings
-        
+
         List<UserBooking> lostUserBookings = new ArrayList<>();
         for(UserBooking userBooking: userBookings ){
             Boolean bookingIdIsLost = true;
