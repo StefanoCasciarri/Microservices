@@ -4,6 +4,7 @@ import com.bestgroup.conferenceroomservice.ConferenceRoom;
 import com.bestgroup.conferenceroomservice.ConferenceRoomRepository;
 import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
 import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
+import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,25 +34,33 @@ public class RoomBookingService {
         this.validationService = validationService;
     }
 
-    public List<RoomBooking> getRoomBookings(int id) {
+    public List<RoomBookingInfo> getRoomBookingsInfo(int roomId) {
 
-        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(id);
+        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
 
         List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
         List<UserBooking>  userBookings = getUserInfo(roomBookings);
         List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
+        for(RoomBooking roomBooking: roomBookings){
+            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
+            roomBookingInfo.setRoomBooking(roomBooking);
+            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
+            roomBookingInfos.add(roomBookingInfo);
+        }
 
-        //TODO finish this. create RoomBookingInfo list wiht userBooing info
+        return roomBookingInfos;
+    }
 
-        //TODO: call USER microservice to get info about user connected with booking
-        //TODO: then change the retrun structure
-
-        return conferenceRoom.get().getRoomBookings();
+    private User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
+        for(UserBooking userBooking: userBookings){
+            if (userBooking.getBookingId()== roomBookingId) return userBooking.getUserId();
+        }
+        return null;
     }
 
     private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
-        //TODO finish this. parameter bookings does not work
+
         List<Integer> bookings = new ArrayList<>();// list of bookings Ids
         roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
 
@@ -61,8 +70,9 @@ public class RoomBookingService {
                 .fromUriString(uri)
                 .queryParam("bookings", bookings);
 
-        ResponseEntity<UserBooking[]> responseEntity= restTemplate.getForEntity(builder.toUriString(),  UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(responseEntity.getBody());
+        UserBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  UserBooking[].class);
+        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
+
         return userBookings;
 
     }

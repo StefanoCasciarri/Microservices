@@ -59,6 +59,9 @@ public class UserController {
 
     @GetMapping("users/bookings/")
     public List<UserBooking> getUserBookings(@RequestParam List<Integer> bookings){
+        for(UserBooking userBooking: userService.getUserBookings(bookings)){
+            System.out.println("USER"+userBooking.getUserId().getId());
+        }
         return userService.getUserBookings(bookings);
     }
 }

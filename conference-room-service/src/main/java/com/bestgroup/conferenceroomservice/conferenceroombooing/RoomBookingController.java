@@ -1,5 +1,6 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
+import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,9 +31,9 @@ public class RoomBookingController {
         return new ResponseEntity<RoomBooking>(roomBooking, HttpStatus.CREATED);
     }
 
-    @GetMapping("/conference-rooms/{id}/bookings")
-    public List<RoomBooking> getRoomBookings(@PathVariable int id) {
+    @GetMapping("/conference-rooms/{roomId}/bookings")
+    public List<RoomBookingInfo> getRoomBookings(@PathVariable int roomId) {
 
-        return roomBookingService.getRoomBookings(id);
+        return roomBookingService.getRoomBookingsInfo(roomId);
     }
 }

@@ -7,7 +7,7 @@ import lombok.Data;
 public class RoomBookingInfo {
 
     private RoomBooking roomBooking;
-    private User user;
+    private User user; //maybe can be renamed to userInfo for clarity
 
 
 }
