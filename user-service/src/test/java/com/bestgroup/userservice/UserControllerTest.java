@@ -9,6 +9,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.print.attribute.ResolutionSyntax;
 import java.net.URI;
@@ -60,7 +63,7 @@ class UserControllerTest {
         ResponseEntity<Object> responseEntity = userController.postUser(user);
 
         assertNotNull(responseEntity);
-        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
+        assertEquals(201, responseEntity.getStatusCodeValue());
         assertEquals("/1",responseEntity.getHeaders().getLocation().getPath());
 
     }
@@ -121,10 +124,16 @@ class UserControllerTest {
 
     @Test
     void addUserBooking() {
+        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockHttpServletRequest));
+
         UserBooking userBooking = new UserBooking(5, new User("John", "Doe"));
+
         when(userService.addUserBooking(anyInt(),anyInt())).thenReturn(userBooking);
 
-        ResponseEntity<UserBooking> responseEntity = userController.addUserBooking(5, new User("John", "Doe"));
+        ResponseEntity<UserBooking> responseEntity = userController.addUserBooking(5, 8);
+
+        assertEquals(201, responseEntity.getStatusCodeValue());
     }
 
     @Test

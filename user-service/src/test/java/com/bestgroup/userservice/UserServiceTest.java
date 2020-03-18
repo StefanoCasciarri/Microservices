@@ -8,6 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +45,7 @@ class UserServiceTest {
 
         List<User> fetchedList = userService.retrieveAllUsers();
 
+        assertNotNull(fetchedList);
         assertEquals(2, fetchedList.size());
         assertEquals("John", fetchedList.get(0).getFirstName());
         assertEquals("Smith", fetchedList.get(0).getLastName());
@@ -55,6 +60,7 @@ class UserServiceTest {
 
         User mockedUser = userService.retrieveUser(33);
 
+        assertNotNull(mockedUser);
         assertEquals("John", mockedUser.getFirstName());
         assertEquals("Doe", mockedUser.getLastName());
     }
@@ -71,15 +77,15 @@ class UserServiceTest {
 
     @Test
     void newUser() {
-//        User user = new User("John", "Doe");
-//        when(userRepository.save(any(User.class))).thenReturn(user);
-//
-//        ResponseEntity<Object> responseEntity = userService.newUser(user);
-//
-//
-//        assertNotNull(responseEntity);
-//        assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-//        assertEquals("/1",responseEntity.getHeaders().getLocation().getPath());
+        MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
+        RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(mockHttpServletRequest));
+        User user = new User("John", "Doe");
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        ResponseEntity<Object> responseEntity = userService.newUser(user);
+
+        assertNotNull(responseEntity);
+        assertEquals(201, responseEntity.getStatusCodeValue());
     }
 
     @Test
