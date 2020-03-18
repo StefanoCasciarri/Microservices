@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.print.attribute.ResolutionSyntax;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -120,9 +121,10 @@ class UserControllerTest {
 
     @Test
     void addUserBooking() {
+        UserBooking userBooking = new UserBooking(5, new User("John", "Doe"));
+        when(userService.addUserBooking(anyInt(),anyInt())).thenReturn(userBooking);
 
-
-
+        ResponseEntity<UserBooking> responseEntity = userController.addUserBooking(5, new User("John", "Doe"));
     }
 
     @Test
