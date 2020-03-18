@@ -1,44 +1,66 @@
 package com.bestgroup.conferenceroomservice;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBooking;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import javax.validation.constraints.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-public class ConferenceRoom {
+@Table(name="conferenceRooms")
+@NoArgsConstructor
+@Getter
+public class ConferenceRoom  {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @Column(name = "roomId")
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private int roomId;
 
+    @NotNull(message = "Field must not be empty.")
+    @Min(value=0)
+    @Max(value=50)
+    @Setter
+    private Integer floor;
+
+    @NotBlank(message = "Field must not be empty.")
+    @Size(min=2,max=30)
+    @Setter
     private String name;
+
+    @NotNull(message = "Field must not be empty.")
+    @Min(value=1)
+    @Max(value=50)
+    @Setter
+    private Integer size;
+
+    @JsonIgnore
+    @OneToMany(fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "conferenceRoom")
+    @Setter
+    private List<RoomBooking> roomBookings;
+
+
+    public ConferenceRoom(int floor,String name,int size){
+        this.floor = floor;
+        this.name = name;
+        this.size = size;
+        this.roomBookings = new ArrayList<>();
+    }
+
+
 
     @Override
     public String toString() {
         return "ConferenceRoom{" +
-                "id=" + id +
+                "id=" + roomId +
+                ", floor=" + floor +
                 ", name='" + name + '\'' +
+                ", size=" + size +
                 '}';
     }
-
-    public ConferenceRoom() {}
-
-    public ConferenceRoom(String name) {
-        this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-
 }
