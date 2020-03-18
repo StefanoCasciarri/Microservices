@@ -2,15 +2,13 @@ package com.bestgroup.userservice;
 
 
 import com.bestgroup.userservice.entities.User;
+import com.bestgroup.userservice.entities.UserBooking;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +65,8 @@ class UserServiceTest {
         Optional<User> userOptional = Optional.ofNullable(null);
         when(userRepository.findById(anyInt())).thenReturn(userOptional);
 
-        assertThrows(UserNotFoundException.class, () -> userService.retrieveUser(33));
+        assertThrows(UserNotFoundException.class,
+                () -> userService.retrieveUser(33));
     }
 
     @Test
@@ -91,7 +90,8 @@ class UserServiceTest {
 
     @Test
     void removeUserIfUserExists() {
-        when(userRepository.findById(anyInt())).thenReturn(Optional.ofNullable(new User("John", "Doe")));
+        when(userRepository.findById(anyInt()))
+                .thenReturn(Optional.ofNullable(new User("John", "Doe")));
         assertTrue(userService.removeUser(54));
     }
 
@@ -108,11 +108,32 @@ class UserServiceTest {
     }
 
     @Test
+    void retrieveUserBookings() {
+//        User user = new User("John", "Doe");
+//        when(userRepository.findById(anyInt()))
+//                .thenReturn(Optional.of(user));
+//
+//        List<UserBooking> userBookingList = new ArrayList<>();
+//        userBookingList.add(new UserBooking(32, user));
+//        userBookingList.add(new UserBooking(53, user));
+//
+//        when(any(User.class).getBookings()).thenReturn(userBookingList);
+//
+//        List<UserBooking> mockedList = userService.retrieveUserBookings(123);
+//
+//        assertNotNull(mockedList);
+//        assertEquals(2, mockedList.size());
+//        assertEquals(32, mockedList.get(0).getBookingId());
+//        assertEquals(54, mockedList.get(1).getBookingId());
+    }
+
+    @Test
     void retrieveUserBookingsThrowUserNotFoundException() {
-        when(userRepository.findById(anyInt())).thenReturn(Optional.ofNullable(null));
+        when(userRepository.findById(anyInt()))
+                .thenReturn(Optional.ofNullable(null));
 
-        assertThrows(UserNotFoundException.class, () -> userService.retrieveUserBookings(32));
-
+        assertThrows(UserNotFoundException.class,
+                () -> userService.retrieveUserBookings(32));
     }
 
     @Test

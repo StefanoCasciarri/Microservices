@@ -80,11 +80,11 @@ public class UserService {
     }
 
     public UserBooking addUserBooking(int userId, int bookingId ){
-       Optional<User>  user = userRepository.findById(userId);
-       if(!user.isPresent()) {
+       Optional<User>  optionalUser = userRepository.findById(userId);
+       if(!optionalUser.isPresent()) {
            throw new UserNotFoundException("id: " + userId);
        }
-       return bookingRepository.save(new UserBooking(bookingId,user.get()));
+       return bookingRepository.save(new UserBooking(bookingId,optionalUser.get()));
     }
 
     public List<UserBooking> getUserBookings(List<Integer> bookings) {
