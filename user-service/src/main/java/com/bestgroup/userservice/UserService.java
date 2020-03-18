@@ -48,13 +48,10 @@ public class UserService {
     }
 
     public User retrieveUser(int id) {
-        Optional<User> optionalUser = userRepository.findById(id);
+        Optional<User> userWrappedInOptional = userRepository.findById(id);
+        userWrappedInOptional.orElseThrow(() -> new UserNotFoundException("id: " + id));
 
-        if(!optionalUser.isPresent()) {
-            throw new UserNotFoundException("id: " + id);
-        }
-
-        return optionalUser.get();
+        return userWrappedInOptional.get();
     }
 
     public boolean removeUser(int id) {
@@ -76,8 +73,19 @@ public class UserService {
                     userRepository.save(user);
                     return user;
                 });
-        return null;
+        return updatedUser;
     }
+
+
+    public List<UserBooking> retrieveUserBookings(@PathVariable int id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+
+        if(!optionalUser.isPresent()) {
+            throw new UserNotFoundException("id: " + id);
+        }
+
+        //TODO communicate with second microservice and retrieving booking information
+        return optionalUser.get().getBookings();
 
     public List<RoomBooking> retrieveUserBookings(int userId) {
         Optional<User> user = userRepository.findById(userId);
@@ -120,14 +128,15 @@ public class UserService {
         userBookings.removeAll(lostUserBookings);
         bookingRepository.deleteAll(lostUserBookings);
         return userBookings;
+
     }
 
     public UserBooking addUserBooking(int userId, int bookingId ){
-       Optional<User>  user = userRepository.findById(userId);
-       if(!user.isPresent()) {
+       Optional<User> optionalUser = userRepository.findById(userId);
+       if(!optionalUser.isPresent()) {
            throw new UserNotFoundException("id: " + userId);
        }
-       return bookingRepository.save(new UserBooking(bookingId,user.get()));
+       return bookingRepository.save(new UserBooking(bookingId,optionalUser.get()));
     }
 
     public List<UserBooking> getUserBookings(List<Integer> bookings) {

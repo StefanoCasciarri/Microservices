@@ -19,8 +19,8 @@ public class UserBooking {
     private User userId;
 
 
-    public UserBooking() {
-    }
+    public UserBooking() {}
+
     public UserBooking(int bookingId, User userId) {
       this.userId = userId;
       this.bookingId = bookingId;
