@@ -21,11 +21,6 @@ public class RoomBooking {
     private int roomBookingId;
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name="roomId")
-    @Setter
-    private ConferenceRoom conferenceRoom;
-
     @NotNull(message = "Field must not be empty.")
     @Future(message = "Date should be future")
     @Setter
@@ -35,6 +30,12 @@ public class RoomBooking {
     @Future(message = "Date should be future")
     @Setter
     private Date endDateTime;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name="roomId")
+    @Setter
+    private ConferenceRoom conferenceRoom;
+
 
     //TODO validate room not occupied
 }
