@@ -39,48 +39,6 @@ public class RoomBookingService {
         this.restTemplate = restTemplate;
     }
 
-    public List<RoomBookingInfo> getRoomBookingsInfo(int roomId) {
-
-        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
-        conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
-
-        List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
-        List<UserBooking>  userBookings = getUserInfo(roomBookings);
-        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
-        for(RoomBooking roomBooking: roomBookings){
-            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
-            roomBookingInfo.setRoomBooking(roomBooking);
-            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
-            roomBookingInfos.add(roomBookingInfo);
-        }
-
-        return roomBookingInfos;
-    }
-
-    private User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
-        for(UserBooking userBooking: userBookings){
-            if (userBooking.getBookingId()== roomBookingId) return userBooking.getUserId();
-        }
-        return null;
-    }
-
-    private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
-
-        List<Integer> bookings = new ArrayList<>();// list of bookings Ids
-        roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
-
-        String uri = new String("http://localhost:8090/users/bookings/");
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromUriString(uri)
-                .queryParam("bookings", bookings);
-
-        UserBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
-
-        return userBookings;
-
-    }
-
 
     public RoomBookingInfo createRoomBooking(Integer roomId, Integer userId, RoomBooking roomBooking) {
         validateRoomBookingParameters(roomId, roomBooking);
@@ -91,20 +49,20 @@ public class RoomBookingService {
 
     }
 
-    public boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
+    private boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
         validationService.isRoomExist(roomId);
         validationService.isDurationValid(roomBooking);
         validationService.isRoomAvailable(roomId, roomBooking);
         return true;
     }
 
-    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
+    private RoomBooking saveRoomBooking(RoomBooking roomBooking) {
         roomBookingRepository.save(roomBooking);
 
         return roomBooking;
     }
 
-    public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
+    private ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
         Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
         ConferenceRoom conferenceRoom;
         if(optionalConferenceRoom.isPresent()){//check not nesecary when used validationService.isRoomExist(roomId);
@@ -121,7 +79,7 @@ public class RoomBookingService {
         return conferenceRoom;
     }
 
-    public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
+    private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
 
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
@@ -149,6 +107,53 @@ public class RoomBookingService {
         conferenceRoom.get().getRoomBookings().remove(roomBooking);
     }
 
+
+    //get info about bookings for a room by room id
+    public List<RoomBookingInfo> getRoomBookingsInfo(int roomId) {
+
+        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
+        conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
+
+        List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
+        List<UserBooking>  userBookings = getUserInfo(roomBookings);
+        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
+        for(RoomBooking roomBooking: roomBookings){
+            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
+            roomBookingInfo.setRoomBooking(roomBooking);
+            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
+            roomBookingInfos.add(roomBookingInfo);
+        }
+
+        return roomBookingInfos;
+    }
+
+    // call User Microservice to get Info about Users who have those Bookings
+    private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
+
+        List<Integer> bookings = new ArrayList<>();// list of bookings Ids
+        roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
+
+        String uri = new String("http://localhost:8090/users/bookings/");
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uri)
+                .queryParam("bookings", bookings);
+
+        UserBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  UserBooking[].class);
+        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
+
+        return userBookings;
+
+    }
+
+    //Connect booking id with user id
+    private User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
+        for(UserBooking userBooking: userBookings){
+            if (userBooking.getBookingId()== roomBookingId) return userBooking.getUserId();
+        }
+        return null;
+    }
+
+    //get info about bookings by their booings ids
     public List<RoomBooking> getBookingsInfo(List<Integer> bookings) {
 
         List<RoomBooking> roomBookings = roomBookingRepository.findAllById(bookings);
