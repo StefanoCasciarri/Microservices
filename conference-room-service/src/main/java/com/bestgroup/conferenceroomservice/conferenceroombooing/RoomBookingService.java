@@ -108,18 +108,12 @@ public class RoomBookingService {
     //get info about bookings for a room by room id
     public List<RoomBookingInfo> getRoomBookingsInfo(int roomId) {
 
+        validationService.isRoomExist(roomId);
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
-        conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
 
         List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
         List<UserBooking>  userBookings = getUserInfo(roomBookings);
-        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
-        for(RoomBooking roomBooking: roomBookings){
-            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
-            roomBookingInfo.setRoomBooking(roomBooking);
-            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
-            roomBookingInfos.add(roomBookingInfo);
-        }
+        List<RoomBookingInfo> roomBookingInfos =  retrieveRoomBookingsInfo(roomBookings, userBookings);
 
         return roomBookingInfos;
     }
@@ -127,19 +121,41 @@ public class RoomBookingService {
     // call User Microservice to get Info about Users who have those Bookings
     private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
 
-        List<Integer> bookings = new ArrayList<>();// list of bookings Ids
-        roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
+        List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
+        String uri = createUriCall(bookingsIds);
+
+        UserBooking[] userBookingsArray= restTemplate.getForObject(uri,  UserBooking[].class);
+        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
+
+        return userBookings;
+    }
+
+    private List<Integer> retrieveRoomBookingsIds(List<RoomBooking> roomBookings) {
+
+        List<Integer> bookingsIds = new ArrayList<>();// list of bookings Ids
+        roomBookings.forEach(roomBooking -> bookingsIds.add(roomBooking.getRoomBookingId()));
+        return bookingsIds;
+    }
+
+    private String createUriCall(List<Integer> bookingsIds) {
 
         String uri = new String("http://localhost:8090/users/bookings/");
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uri)
-                .queryParam("bookings", bookings);
+                .queryParam("bookings", bookingsIds);
+        return  builder.toUriString();
+    }
 
-        UserBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
-
-        return userBookings;
-
+    //retrieve info from room bookings and user bookings and connect them into room bookings info
+    private List<RoomBookingInfo> retrieveRoomBookingsInfo(List<RoomBooking> roomBookings, List<UserBooking> userBookings) {
+        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
+        for(RoomBooking roomBooking: roomBookings){
+            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
+            roomBookingInfo.setRoomBooking(roomBooking);
+            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
+            roomBookingInfos.add(roomBookingInfo);
+        }
+        return roomBookingInfos;
     }
 
     //Connect booking id with user id
