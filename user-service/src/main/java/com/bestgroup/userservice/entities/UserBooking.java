@@ -1,7 +1,5 @@
 package com.bestgroup.userservice.entities;
 
-
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
@@ -19,8 +17,8 @@ public class UserBooking {
     private User userId;
 
 
-    public UserBooking() {
-    }
+    public UserBooking() {}
+
     public UserBooking(int bookingId, User userId) {
       this.userId = userId;
       this.bookingId = bookingId;
