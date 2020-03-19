@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,15 +42,18 @@ public class RoomBookingService {
 
 
     public RoomBookingInfo createRoomBooking(Integer roomId, Integer userId, RoomBooking roomBooking) {
+
         validateRoomBookingParameters(roomId, roomBooking);
         saveRoomBooking(roomBooking);
         saveRoomBookingtoConferenceRoom(roomId, roomBooking);
+        System.out.println(conferenceRoomRepository.findAll());
+        System.out.println(roomBookingRepository.findAll());
         UserBooking userBooking = saveRoomBookingtoUser(userId, roomBooking);
         return new RoomBookingInfo(roomBooking, userBooking.getUserId());
-
     }
 
     private boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
+
         validationService.isRoomExist(roomId);
         validationService.isDurationValid(roomBooking);
         validationService.isRoomAvailable(roomId, roomBooking);
@@ -57,42 +61,35 @@ public class RoomBookingService {
     }
 
     private RoomBooking saveRoomBooking(RoomBooking roomBooking) {
-        roomBookingRepository.save(roomBooking);
 
-        return roomBooking;
+        return roomBookingRepository.save(roomBooking);
     }
 
     private ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
-        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
-        ConferenceRoom conferenceRoom;
-        if(optionalConferenceRoom.isPresent()){//check not nesecary when used validationService.isRoomExist(roomId);
-            conferenceRoom = optionalConferenceRoom.get();
-            conferenceRoom.getRoomBookings().add(roomBooking);
-            roomBooking.setConferenceRoom(conferenceRoom);
-            conferenceRoomRepository.save(conferenceRoom);
-        }
-        else{
-            //if room doesnt exist then delete saved roomBooking
-            roomBookingRepository.delete(roomBooking);
-            throw new ResourceNotFoundException("No such room.");
-        }
-        return conferenceRoom;
+
+        validationService.isRoomExist(roomId);// make sure room exists, when saving a room to repo made at beginning so no booking was saved when no room
+        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
+        conferenceRoom.get().getRoomBookings().add(roomBooking);//add room booking to collection in conference room
+        roomBooking.setConferenceRoom(conferenceRoom.get());
+        conferenceRoomRepository.save(conferenceRoom.get());
+
+        return conferenceRoom.get();
     }
 
     private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
 
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
-        ResponseEntity<UserBooking> userBookingResponseEntity;
+
         try {
-            userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
+            ResponseEntity<UserBooking> userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
+            return userBookingResponseEntity.getBody();
         }
         catch(Exception e){
             //if 404 : cant save to user then delete room booking
             deleteRoomBooking(roomBooking);
             throw new ResourceNotFoundException("Cant save to user");
         }
-        return  userBookingResponseEntity.getBody();
     }
 
     private void deleteRoomBooking(RoomBooking roomBooking) {
