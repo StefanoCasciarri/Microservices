@@ -1,5 +1,6 @@
 package com.bestgroup.userservice.responseentitystructure;
 
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -7,20 +8,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ConferenceRoom {
 
-
     private int roomId;
     private Integer floor;
     private String name;
     private Integer size;
-
 
     public ConferenceRoom(int floor, String name, int size){
         this.floor = floor;
         this.name = name;
         this.size = size;
     }
-
-
 
     @Override
     public String toString() {
