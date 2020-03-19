@@ -2,6 +2,7 @@ package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
 import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
+import com.bestgroup.conferenceroomservice.security.TokenString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -4,13 +4,20 @@ import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
 import com.bestgroup.userservice.repository.UserBookingRepository;
 import com.bestgroup.userservice.repository.UserRepository;
+import com.bestgroup.userservice.responseentitystructure.RoomBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +37,7 @@ public class UserService {
                        RestTemplate restTemplate) {
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
+        this.restTemplate = restTemplate;
     }
 
     public List<User> retrieveAllUsers() {
@@ -42,7 +50,7 @@ public class UserService {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedUser.getId()).toUri();
+                .buildAndExpand(savedUser.getUserId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -89,11 +97,13 @@ public class UserService {
                 .fromUriString(uri)
                 .queryParam("bookings", bookingsIds);
 
-        RoomBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  RoomBooking[].class);
-        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray);
-
+        HttpEntity entity = this.createTokenHeader();
+        ResponseEntity<RoomBooking[]> userBookingsArray;
+         restTemplate.exchange(uri, HttpMethod.GET, entity, RoomBooking[].class);
+       // List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray.getBody());
+        List<RoomBooking>  roomBookings = new ArrayList<>();
         //delete those UserBookings that were lost in Room Microservice
-        userBookings = deleteLostUserBookings(userBookings, roomBookings);
+        //userBookings = deleteLostUserBookings(userBookings, roomBookings);
 
         return roomBookings; // may be empty, if bookingId not found then not shown
     }
@@ -130,5 +140,25 @@ public class UserService {
 
     public List<UserBooking> getUserBookings(List<Integer> bookings) {
         return  bookingRepository.findAllById(bookings);
+    }
+
+
+
+    private String getTokenFromRequest(){
+        HttpServletRequest request = ((ServletRequestAttributes)
+                RequestContextHolder
+                        .currentRequestAttributes())
+                .getRequest();
+        String value = request.getHeader("Authorization").split(" ")[1];
+        return value;
+    }
+
+    private HttpEntity createTokenHeader(){
+        String token = this.getTokenFromRequest();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        return new HttpEntity(headers);
     }
 }

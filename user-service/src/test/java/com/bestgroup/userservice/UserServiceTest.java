@@ -3,6 +3,8 @@ package com.bestgroup.userservice;
 
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
+import com.bestgroup.userservice.repository.UserBookingRepository;
+import com.bestgroup.userservice.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -154,7 +156,7 @@ class UserServiceTest {
 
         assertNotNull(userBooking);
         assertEquals(3, userBooking.getBookingId());
-        assertEquals(0, userBooking.getUserId().getId());
+        assertEquals(0, userBooking.getUserId().getUserId());
     }
 
     @Test

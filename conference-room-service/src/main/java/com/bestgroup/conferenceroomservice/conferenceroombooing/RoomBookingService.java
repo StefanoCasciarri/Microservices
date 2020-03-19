@@ -6,8 +6,14 @@ import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
 import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
+import com.bestgroup.conferenceroomservice.security.TokenString;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import org.springframework.http.ResponseEntity;
@@ -15,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +39,8 @@ public class RoomBookingService {
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
                               ConferenceRoomRepository conferenceRoomRepository,
                               ValidationService validationService,
-                              RestTemplate restTemplate) {
+                              RestTemplate restTemplate,
+                              TokenString tokenString) {
         this.roomBookingRepository = roomBookingRepository;
         this.conferenceRoomRepository = conferenceRoomRepository;
         this.validationService = validationService;
@@ -73,9 +81,9 @@ public class RoomBookingService {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uri)
                 .queryParam("bookings", bookings);
-
-        UserBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
+        HttpEntity entity = this.createTokenHeader();
+        ResponseEntity<UserBooking[]> userBookingsArray= restTemplate.exchange(builder.toUriString(),HttpMethod.GET,entity,  UserBooking[].class);
+        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray.getBody());
 
         return userBookings;
 
@@ -123,16 +131,18 @@ public class RoomBookingService {
 
     public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
 
+        HttpEntity entity = this.createTokenHeader();
+
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
         ResponseEntity<UserBooking> userBookingResponseEntity;
         try {
-            userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
+            userBookingResponseEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, UserBooking.class);
         }
         catch(Exception e){
             //if 404 : cant save to user then delete room booking
             deleteRoomBooking(roomBooking);
-            throw new ResourceNotFoundException("Cant save to user");
+            throw new ResourceNotFoundException("Cant save to user: "+ e.getMessage());
         }
         return  userBookingResponseEntity.getBody();
     }
@@ -153,5 +163,23 @@ public class RoomBookingService {
 
         List<RoomBooking> roomBookings = roomBookingRepository.findAllById(bookings);
         return roomBookings;
+    }
+
+    private String getTokenFromRequest(){
+        HttpServletRequest request = ((ServletRequestAttributes)
+                RequestContextHolder
+                        .currentRequestAttributes())
+                .getRequest();
+        String value = request.getHeader("Authorization").split(" ")[1];
+        return value;
+    }
+
+    private HttpEntity createTokenHeader(){
+        String token = this.getTokenFromRequest();
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        return new HttpEntity(headers);
     }
 }
