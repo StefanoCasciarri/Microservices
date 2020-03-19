@@ -49,20 +49,20 @@ public class RoomBookingService {
 
     }
 
-    private boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
+    public boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
         validationService.isRoomExist(roomId);
         validationService.isDurationValid(roomBooking);
         validationService.isRoomAvailable(roomId, roomBooking);
         return true;
     }
 
-    private RoomBooking saveRoomBooking(RoomBooking roomBooking) {
+    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
         roomBookingRepository.save(roomBooking);
 
         return roomBooking;
     }
 
-    private ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
+    public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
         Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
         ConferenceRoom conferenceRoom;
         if(optionalConferenceRoom.isPresent()){//check not nesecary when used validationService.isRoomExist(roomId);
@@ -79,7 +79,7 @@ public class RoomBookingService {
         return conferenceRoom;
     }
 
-    private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
+    public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
 
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
@@ -95,13 +95,13 @@ public class RoomBookingService {
         return  userBookingResponseEntity.getBody();
     }
 
-    private void deleteRoomBooking(RoomBooking roomBooking) {
+    public void deleteRoomBooking(RoomBooking roomBooking) {
         //first delete roomBooking form conferenceRoom collection
         deleteRoomBookingfromConferenceRoom(roomBooking);
         roomBookingRepository.delete(roomBooking);
     }
 
-    private void deleteRoomBookingfromConferenceRoom(RoomBooking roomBooking) {
+    public void deleteRoomBookingfromConferenceRoom(RoomBooking roomBooking) {
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomBooking.getConferenceRoom().getRoomId());
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         conferenceRoom.get().getRoomBookings().remove(roomBooking);
@@ -128,7 +128,7 @@ public class RoomBookingService {
     }
 
     // call User Microservice to get Info about Users who have those Bookings
-    private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
+    public List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
 
         List<Integer> bookings = new ArrayList<>();// list of bookings Ids
         roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
@@ -146,7 +146,7 @@ public class RoomBookingService {
     }
 
     //Connect booking id with user id
-    private User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
+    public User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
         for(UserBooking userBooking: userBookings){
             if (userBooking.getBookingId()== roomBookingId) return userBooking.getUserId();
         }
