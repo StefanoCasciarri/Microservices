@@ -78,46 +78,80 @@ public class UserService {
 
     public List<RoomBooking> retrieveUserBookings(int userId) {
         Optional<User> user = userRepository.findById(userId);
-        if(!user.isPresent()) throw new UserNotFoundException("id: " + userId);
+        if(!user.isPresent()) throw new UserNotFoundException("id: " + userId);//check if user Exixts
+
+        List<UserBooking> userBookings = user.get().getBookings();
+        List<RoomBooking>  roomBookings = retrieveRoomBookings(userBookings);
+
+        //delete those UserBookings that were lost in Room Microservice
+        deleteLostUserBookings(userBookings, roomBookings);
+
+        return roomBookings; // may be empty, if bookingId not found then not shown
+    }
+
+    //retrieve room bookings form Room Microservice
+    private List<RoomBooking> retrieveRoomBookings(List<UserBooking> userBookings) {
+
+        List<Integer> bookingsIds = retrieveUserBookingsIds(userBookings);
+        String uri = createUriCall(bookingsIds);
+        RoomBooking[] userBookingsArray= restTemplate.getForObject(uri,  RoomBooking[].class);
+        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray);
+        return roomBookings;
+    }
+
+    private List<Integer> retrieveUserBookingsIds(List<UserBooking> userBookings) {
 
         List<Integer> bookingsIds = new ArrayList<>();// list of bookings Ids
-        List<UserBooking> userBookings = user.get().getBookings();
         userBookings.forEach(userBooking -> bookingsIds.add(userBooking.getBookingId()));
+        return bookingsIds;
+    }
+
+    private String createUriCall(List<Integer> bookingsIds) {
 
         String uri = new String("http://localhost:8070/conference-rooms/bookings/");
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uri)
                 .queryParam("bookings", bookingsIds);
-
-        RoomBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  RoomBooking[].class);
-        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray);
-
-        //delete those UserBookings that were lost in Room Microservice
-        userBookings = deleteLostUserBookings(userBookings, roomBookings);
-
-        return roomBookings; // may be empty, if bookingId not found then not shown
+        return  builder.toUriString();
     }
 
+    //delete those userBookings that their id can not be found in roomBookings
     private List<UserBooking> deleteLostUserBookings(List<UserBooking> userBookings, List<RoomBooking> roomBookings) {
-        //delete those userBookings that their id can not be found in roomBookings
+
+        List<UserBooking> lostUserBookings = findLostUserBookings(userBookings, roomBookings);
+
+        userBookings.removeAll(lostUserBookings); //remove lost bookings from collection in user
+        bookingRepository.deleteAll(lostUserBookings); //remove lost bookings from repository
+
+        return userBookings;
+    }
+
+    //find those userBookings that their id can not be found in roomBookings
+    private List<UserBooking> findLostUserBookings(List<UserBooking> userBookings, List<RoomBooking> roomBookings) {
 
         List<UserBooking> lostUserBookings = new ArrayList<>();
         for(UserBooking userBooking: userBookings ){
-            Boolean bookingIdIsLost = true;
-            for(RoomBooking roomBooking: roomBookings){
-                if(roomBooking.getRoomBookingId()==userBooking.getBookingId()) {
-                    bookingIdIsLost = false;
-                    break;
-                }
-            }
+            Boolean bookingIdIsLost = checkIfLostUserBooking(userBooking, roomBookings);
+
             if(bookingIdIsLost){
-                lostUserBookings.add(userBooking);
+                lostUserBookings.add(userBooking); //add userBooking that wasnt fount in roomBookings to lostUserBookings
             }
         }
-        userBookings.removeAll(lostUserBookings);
-        bookingRepository.deleteAll(lostUserBookings);
-        return userBookings;
+        return lostUserBookings;
+    }
 
+    //check if userBooking is present in roomBookings if not then its lost
+    private Boolean checkIfLostUserBooking(UserBooking userBooking, List<RoomBooking> roomBookings) {
+
+        Boolean bookingIdIsLost = true;
+
+        for(RoomBooking roomBooking: roomBookings){
+            if(roomBooking.getRoomBookingId()==userBooking.getBookingId()) {
+                bookingIdIsLost = false; //userBooking found in roomBooking
+                break;
+            }
+        }
+        return  bookingIdIsLost;
     }
 
     public UserBooking addUserBooking(int userId, int bookingId ){
