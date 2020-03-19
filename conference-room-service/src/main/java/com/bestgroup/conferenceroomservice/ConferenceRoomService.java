@@ -26,7 +26,10 @@ public class ConferenceRoomService {
     }
 
     public void deleteRoomById(Integer roomId) {
-        conferenceRoomRepository.deleteById(roomId);
+        ConferenceRoom conferenceRoom =
+                conferenceRoomRepository.findById(roomId).orElseThrow( () -> new ResourceNotFoundException("No such room."));
+        if(conferenceRoom != null)
+            conferenceRoomRepository.deleteById(roomId);
     }
 
     public ConferenceRoom update(Integer roomId, ConferenceRoom room) {
