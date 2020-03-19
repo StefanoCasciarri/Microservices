@@ -24,6 +24,7 @@ public class ValidationService {
         this.conferenceRoomRepository = conferenceRoomRepository;
 
     }
+
     public boolean isRoomExist(Integer roomId){
         Optional<ConferenceRoom> roomBookings = conferenceRoomRepository.findById(roomId);
         if(roomBookings.isPresent()){
@@ -31,6 +32,7 @@ public class ValidationService {
         }
         else throw new ResourceNotFoundException("No such room.");
     }
+
     public boolean isDurationValid(RoomBooking roomBooking){
         if(roomBooking.getStartDateTime().compareTo(roomBooking.getEndDateTime()) < 0){
             return true;
@@ -43,17 +45,17 @@ public class ValidationService {
         if(conferenceRoom.isPresent()){
             List<RoomBooking> roomBookings  = conferenceRoom.get().getRoomBookings();
             for(RoomBooking roomBooked: roomBookings){
-                if((    roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) < 0 &&
-                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getStartDateTime()) > 0) ||
+                if((    roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) <= 0 &&
+                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getStartDateTime()) >= 0) ||
 
-                       (roomBooked.getStartDateTime().compareTo(newRoomBooking.getEndDateTime()) < 0 &&
-                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) > 0) ||
+                       (roomBooked.getStartDateTime().compareTo(newRoomBooking.getEndDateTime()) <= 0 &&
+                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) >= 0) ||
 
-                       (roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) > 0 &&
-                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) < 0) ||
+                       (roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) >= 0 &&
+                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) <= 0) ||
 
-                       (roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) < 0 &&
-                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) > 0)||
+                       (roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) <= 0 &&
+                        roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) >= 0)||
 
                         (roomBooked.getStartDateTime().compareTo(newRoomBooking.getStartDateTime()) == 0 &&
                                 roomBooked.getEndDateTime().compareTo(newRoomBooking.getEndDateTime()) == 0)){
