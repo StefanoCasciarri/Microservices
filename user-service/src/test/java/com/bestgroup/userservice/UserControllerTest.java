@@ -1,7 +1,10 @@
 package com.bestgroup.userservice;
 
+
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
+import com.bestgroup.userservice.responseentitystructure.ConferenceRoom;
+import com.bestgroup.userservice.responseentitystructure.RoomBooking;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -13,8 +16,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,6 +104,39 @@ class UserControllerTest {
 
     }
 
+    @Test
+    void getUserRoomBookings() {
+        List<RoomBooking> roomBookings = new ArrayList<>();
+
+        Date startDate = new Date();
+        Date endDate = new Date();
+        ConferenceRoom conferenceRoom = new ConferenceRoom(2, "Test", 34);
+
+        RoomBooking roomBookingOne = new RoomBooking(3,startDate,endDate,conferenceRoom);
+        RoomBooking roomBookingTwo = new RoomBooking(4,startDate,endDate,conferenceRoom);
+
+        roomBookings.add(roomBookingOne);
+        roomBookings.add(roomBookingTwo);
+
+        when(userService.retrieveUserBookings(anyInt())).thenReturn(roomBookings);
+
+        List<RoomBooking> mockedRoomBookings = userController.getUserRoomBookings(32);
+
+        assertNotNull(mockedRoomBookings);
+        assertEquals(2, mockedRoomBookings.size());
+
+        assertEquals(3, mockedRoomBookings.get(0).getRoomBookingId());
+        assertEquals(4, mockedRoomBookings.get(1).getRoomBookingId());
+
+        assertEquals(startDate, mockedRoomBookings.get(0).getStartDateTime());
+        assertEquals(endDate, mockedRoomBookings.get(0).getEndDateTime());
+
+        assertEquals(startDate, mockedRoomBookings.get(1).getStartDateTime());
+        assertEquals(endDate, mockedRoomBookings.get(1).getEndDateTime());
+
+        assertEquals(conferenceRoom, mockedRoomBookings.get(0).getConferenceRoom());
+        assertEquals(conferenceRoom, mockedRoomBookings.get(1).getConferenceRoom());
+    }
 
     @Test
     void addUserBooking() {
@@ -119,19 +154,20 @@ class UserControllerTest {
 
     @Test
     void getUserBookings() {
-
         List<UserBooking> userBookings = new ArrayList<>();
-        userBookings.add(new UserBooking(3,new User("John","Doe")));
-        userBookings.add(new UserBooking(8,new User("Miranda","Wall")));
+        userBookings.add(new UserBooking(3, new User("John", "Doe")));
+        userBookings.add(new UserBooking(4, new User("Miranda", "Wall")));
 
-        when(userService.retrieveUserBookings(anyInt())).thenReturn(userBookings);
+        when(userService.getUserBookings(any(List.class))).thenReturn(userBookings);
 
-        List<UserBooking> mockedList = userController.getUserBookings(33);
+        List<Integer> integerList = Arrays.asList(2,5,9);
+
+        List<UserBooking> mockedList = userController.getUserBookings(integerList);
 
         assertNotNull(mockedList);
         assertEquals(2, mockedList.size());
         assertEquals(3, mockedList.get(0).getBookingId());
-        assertEquals(8, mockedList.get(1).getBookingId());
-
+        assertEquals(4, mockedList.get(1).getBookingId());
     }
+
 }
