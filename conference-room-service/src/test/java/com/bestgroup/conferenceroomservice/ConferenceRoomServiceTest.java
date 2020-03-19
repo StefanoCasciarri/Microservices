@@ -93,15 +93,7 @@ public class ConferenceRoomServiceTest {
         assertThat(conferenceRoomReturned.getSize()).isEqualTo(15);
 
     }
-
-    @Test
-    public void deleteRoom(){
-
-        conferenceRoomService.deleteRoomById(1);
-
-       verify(conferenceRoomRepository,times(1)).deleteById(1);
-
-    }
+    
 
 }
 
