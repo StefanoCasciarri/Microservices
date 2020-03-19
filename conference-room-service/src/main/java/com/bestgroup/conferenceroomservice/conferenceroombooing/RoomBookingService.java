@@ -111,8 +111,8 @@ public class RoomBookingService {
     //get info about bookings for a room by room id
     public List<RoomBookingInfo> getRoomBookingsInfo(int roomId) {
 
-        validationService.isRoomExist(roomId);
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
+        conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
 
         List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
         List<UserBooking>  userBookings = getUserInfo(roomBookings);
@@ -133,7 +133,7 @@ public class RoomBookingService {
         return userBookings;
     }
 
-    private List<Integer> retrieveRoomBookingsIds(List<RoomBooking> roomBookings) {
+    public List<Integer> retrieveRoomBookingsIds(List<RoomBooking> roomBookings) {
 
         List<Integer> bookingsIds = new ArrayList<>();// list of bookings Ids
         roomBookings.forEach(roomBooking -> bookingsIds.add(roomBooking.getRoomBookingId()));
@@ -150,7 +150,7 @@ public class RoomBookingService {
     }
 
     //retrieve info from room bookings and user bookings and connect them into room bookings info
-    private List<RoomBookingInfo> retrieveRoomBookingsInfo(List<RoomBooking> roomBookings, List<UserBooking> userBookings) {
+    public List<RoomBookingInfo> retrieveRoomBookingsInfo(List<RoomBooking> roomBookings, List<UserBooking> userBookings) {
         List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
         for(RoomBooking roomBooking: roomBookings){
             RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
