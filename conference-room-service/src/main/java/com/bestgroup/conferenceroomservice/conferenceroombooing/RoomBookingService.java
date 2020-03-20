@@ -1,15 +1,15 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
-import com.bestgroup.conferenceroomservice.ConferenceRoom;
-import com.bestgroup.conferenceroomservice.ConferenceRoomRepository;
-import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
+import com.bestgroup.conferenceroomservice.*;
 import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -30,16 +30,20 @@ public class RoomBookingService {
     private ConferenceRoomRepository conferenceRoomRepository;
     private ValidationService validationService;
     private RestTemplate restTemplate;
+    private HealthCheck healthCheck;
+
 
     @Autowired
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
                               ConferenceRoomRepository conferenceRoomRepository,
                               ValidationService validationService,
-                              RestTemplate restTemplate) {
+                              RestTemplate restTemplate,
+                              HealthCheck healthCheck) {
         this.roomBookingRepository = roomBookingRepository;
         this.conferenceRoomRepository = conferenceRoomRepository;
         this.validationService = validationService;
         this.restTemplate = restTemplate;
+        this.healthCheck = healthCheck;
     }
 
 
@@ -80,22 +84,17 @@ public class RoomBookingService {
 
     }
 
-    public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
-
-        HttpEntity entity = this.createTokenHeader();
+    private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
+        if(healthCheck.isStatusUp()) {
+            HttpEntity entity = this.createTokenHeader();
 
         int bookingID = roomBooking.getRoomBookingId();
         String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
 
         try {
-            ResponseEntity<UserBooking> userBookingResponseEntity = userBookingResponseEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, UserBooking.class);
-            return userBookingResponseEntity.getBody();
-
-        }
-        catch(Exception e){
-            //if 404 : cant save to user then delete room booking
-            deleteRoomBooking(roomBooking);
-            throw new ResourceNotFoundException("Cant save to user");
+              ResponseEntity<UserBooking> userBookingResponseEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, UserBooking.class);
+              return userBookingResponseEntity.getBody();
+            } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
         }
     }
 
@@ -126,17 +125,21 @@ public class RoomBookingService {
     }
 
     // call User Microservice to get Info about Users who have those Bookings
-    public List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
+    private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
+        if(healthCheck.isStatusUp()) {
+          List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
+          String uri = createUriCall(bookingsIds);
+          HttpEntity entity = this.createTokenHeader();
 
-        List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
-        String uri = createUriCall(bookingsIds);
-        HttpEntity entity = this.createTokenHeader();
+          ResponseEntity<UserBooking[]> userBookingResponseEntity =  restTemplate.exchange(uri, HttpMethod.GET, entity, UserBooking[].class);
+          List<UserBooking>  userBookings = Arrays.asList(userBookingResponseEntity.getBody());
 
-        ResponseEntity<UserBooking[]> userBookingResponseEntity =  restTemplate.exchange(uri, HttpMethod.GET, entity, UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(userBookingResponseEntity.getBody());
+          return userBookings;
 
-        return userBookings;
+        } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/bookings/ Bad Response");
+
     }
+
 
     public List<Integer> retrieveRoomBookingsIds(List<RoomBooking> roomBookings) {
 

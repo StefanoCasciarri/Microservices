@@ -18,6 +18,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.net.URI;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,6 +31,7 @@ class UserControllerTest {
      UserController userController;
      @Mock
      UserService userService;
+
 
 
     @Test
