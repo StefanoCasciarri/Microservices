@@ -7,20 +7,17 @@ import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingIn
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -133,9 +130,10 @@ public class RoomBookingService {
 
         List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
         String uri = createUriCall(bookingsIds);
+        HttpEntity entity = this.createTokenHeader();
 
-        UserBooking[] userBookingsArray= restTemplate.getForObject(uri,  UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
+        ResponseEntity<UserBooking[]> userBookingResponseEntity =  restTemplate.exchange(uri, HttpMethod.GET, entity, UserBooking[].class);
+        List<UserBooking>  userBookings = Arrays.asList(userBookingResponseEntity.getBody());
 
         return userBookings;
     }

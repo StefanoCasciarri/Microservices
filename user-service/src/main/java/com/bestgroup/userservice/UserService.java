@@ -105,8 +105,11 @@ public class UserService {
 
         List<Integer> bookingsIds = retrieveUserBookingsIds(userBookings);
         String uri = createUriCall(bookingsIds);
-        RoomBooking[] userBookingsArray= restTemplate.getForObject(uri,  RoomBooking[].class);
-        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray);
+        HttpEntity entity = this.createTokenHeader();
+        ResponseEntity<RoomBooking[]> userBookingsArray;
+        userBookingsArray = restTemplate.exchange(uri, HttpMethod.GET, entity, RoomBooking[].class);
+        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray.getBody());
+
         return roomBookings;
     }
 
@@ -124,14 +127,6 @@ public class UserService {
                 .fromUriString(uri)
                 .queryParam("bookings", bookingsIds);
 
-        HttpEntity entity = this.createTokenHeader();
-        ResponseEntity<RoomBooking[]> userBookingsArray;
-        userBookingsArray = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, RoomBooking[].class);
-        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray.getBody());
-        //delete those UserBookings that were lost in Room Microservice
-        deleteLostUserBookings(userBookings, roomBookings);
-
-        return roomBookings; // may be empty, if bookingId not found then not shown
         return  builder.toUriString();
     }
 
