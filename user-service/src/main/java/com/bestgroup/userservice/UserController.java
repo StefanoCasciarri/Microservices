@@ -47,7 +47,7 @@ public class UserController {
     }
 
     @GetMapping("/users/{userId}/bookings")
-    public List<RoomBooking> getUserBookings(@PathVariable int userId) {
+    public List<RoomBooking> getUserRoomBookings(@PathVariable int userId) {
         return userService.retrieveUserBookings(userId);
     }
 
