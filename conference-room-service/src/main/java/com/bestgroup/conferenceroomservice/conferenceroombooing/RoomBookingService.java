@@ -129,11 +129,11 @@ public class RoomBookingService {
              String uri = createUriCall(bookingsIds);
 
              UserBooking[] userBookingsArray= restTemplate.getForObject(uri,  UserBooking[].class);
-             List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);BookingsArray);
+             List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
 
             return userBookings;
         } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/bookings/ Bad Response");
-
+    }
 
     public List<Integer> retrieveRoomBookingsIds(List<RoomBooking> roomBookings) {
 
