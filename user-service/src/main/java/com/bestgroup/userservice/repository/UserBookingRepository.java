@@ -1,4 +1,4 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.repository;
 
 import com.bestgroup.userservice.entities.UserBooking;
 import org.springframework.data.jpa.repository.JpaRepository;

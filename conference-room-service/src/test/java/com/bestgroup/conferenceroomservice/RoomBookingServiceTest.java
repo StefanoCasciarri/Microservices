@@ -5,8 +5,6 @@ import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBooking;
 import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBookingRepository;
 import com.bestgroup.conferenceroomservice.conferenceroombooing.RoomBookingService;
 import com.bestgroup.conferenceroomservice.conferenceroombooing.ValidationService;
-
-import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -83,7 +80,7 @@ public class RoomBookingServiceTest {
     public void findUserByBookingIdReturnUser(){
 
         User user1 = new User();
-        user1.setId(1);
+        user1.setUserId(1);
         user1.setFirstName("Name");
 
         UserBooking userBooking1 = new UserBooking();
@@ -100,7 +97,7 @@ public class RoomBookingServiceTest {
 
         User userFounded = roomBookingService.findUserbyBookingId(1,userBookingList);
 
-        assertThat(userFounded.getId()).isEqualTo(1);
+        assertThat(userFounded.getUserId()).isEqualTo(1);
 
     }
 
@@ -108,7 +105,7 @@ public class RoomBookingServiceTest {
     public void findUserByBookingReturnNull(){
 
         User user1 = new User();
-        user1.setId(1);
+        user1.setUserId(1);
         user1.setFirstName("Name");
 
         UserBooking userBooking1 = new UserBooking();

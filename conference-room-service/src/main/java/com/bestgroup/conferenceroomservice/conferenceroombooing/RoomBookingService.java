@@ -5,12 +5,19 @@ import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingIn
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.ConnectException;
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,7 +72,6 @@ public class RoomBookingService {
         return roomBookingRepository.save(roomBooking);
     }
 
-
     public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
 
         validationService.isRoomExist(roomId);// make sure room exists, when saving a room to repo made at beginning so no booking was saved when no room
@@ -80,20 +86,16 @@ public class RoomBookingService {
 
     private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
         if(healthCheck.isStatusUp()) {
-            int bookingID = roomBooking.getRoomBookingId();
-            String uri = new String("http://localhost:8090/users/" + userId + "/bookings?bookingID=" + bookingID);
-            ResponseEntity<UserBooking> userBookingResponseEntity;
-            try {
-                userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
-            } catch (Exception e) {
-                //if 404 : cant save to user then delete room booking
-                deleteRoomBooking(roomBooking);
-                throw new ResourceNotFoundException("Cant save to user");
-            }
+            HttpEntity entity = this.createTokenHeader();
 
-            return userBookingResponseEntity.getBody();
-        } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
+        int bookingID = roomBooking.getRoomBookingId();
+        String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
 
+        try {
+              ResponseEntity<UserBooking> userBookingResponseEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, UserBooking.class);
+              return userBookingResponseEntity.getBody();
+            } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
+        }
     }
 
     public void deleteRoomBooking(RoomBooking roomBooking) {
@@ -125,14 +127,17 @@ public class RoomBookingService {
     // call User Microservice to get Info about Users who have those Bookings
     private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
         if(healthCheck.isStatusUp()) {
-             List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
-             String uri = createUriCall(bookingsIds);
+          List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
+          String uri = createUriCall(bookingsIds);
+          HttpEntity entity = this.createTokenHeader();
 
-             UserBooking[] userBookingsArray= restTemplate.getForObject(uri,  UserBooking[].class);
-             List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
+          ResponseEntity<UserBooking[]> userBookingResponseEntity =  restTemplate.exchange(uri, HttpMethod.GET, entity, UserBooking[].class);
+          List<UserBooking>  userBookings = Arrays.asList(userBookingResponseEntity.getBody());
 
-            return userBookings;
+          return userBookings;
+
         } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/bookings/ Bad Response");
+
     }
 
 
@@ -158,7 +163,7 @@ public class RoomBookingService {
         for(RoomBooking roomBooking: roomBookings){
             RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
             roomBookingInfo.setRoomBooking(roomBooking);
-            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
+            roomBookingInfo.setUserInfo(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
             roomBookingInfos.add(roomBookingInfo);
         }
         return roomBookingInfos;
@@ -177,5 +182,22 @@ public class RoomBookingService {
 
         List<RoomBooking> roomBookings = roomBookingRepository.findAllById(bookings);
         return roomBookings;
+    }
+
+    private String getTokenFromRequest(){
+        HttpServletRequest request = ((ServletRequestAttributes)
+                RequestContextHolder
+                        .currentRequestAttributes())
+                .getRequest();
+        String value = request.getHeader("Authorization").split(" ")[1];
+        return value;
+    }
+
+    private HttpEntity createTokenHeader(){
+        String token = this.getTokenFromRequest();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        return new HttpEntity(headers);
     }
 }

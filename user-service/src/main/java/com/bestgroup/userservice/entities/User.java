@@ -2,6 +2,8 @@ package com.bestgroup.userservice.entities;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -11,6 +13,10 @@ import java.util.List;
 
 @Entity
 @Table(name="tuser")
+@NoArgsConstructor
+@Getter
+@EqualsAndHashCode(of = "userId")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class User {
 
     @Id
@@ -18,21 +24,20 @@ public class User {
     private int userId;
 
     @NotNull
+    @Setter
     @Size(min=2, max=30)
     private String firstName;
 
     @NotNull
+    @Setter
     @Size(min=2, max=30)
     private String lastName;
-
 
     @JsonIgnore
     @OneToMany( fetch=FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "userId",
               orphanRemoval = true)
     private List<UserBooking> bookings;
 
-
-    public User() {}
 
     public User(String firstName, String lastName) {
         this.firstName = firstName;
@@ -47,33 +52,5 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", bookings=" + bookings +
                 '}';
-    }
-
-    public int getId() {
-        return userId;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public List<UserBooking> getBookings() {
-        return bookings;
-    }
-
-    public void setBookings(List<UserBooking> bookings) {
-        this.bookings = bookings;
     }
 }

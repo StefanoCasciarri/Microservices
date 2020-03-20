@@ -1,9 +1,8 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.repository;
 
 import com.bestgroup.userservice.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-
 
 }

@@ -171,5 +171,4 @@ class UserControllerTest {
         assertEquals(3, mockedList.get(0).getBookingId());
         assertEquals(4, mockedList.get(1).getBookingId());
     }
-
 }

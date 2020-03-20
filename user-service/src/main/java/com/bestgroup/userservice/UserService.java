@@ -4,14 +4,22 @@ import com.bestgroup.userservice.Exceptions.OtherServiceNotRespondingException;
 import com.bestgroup.userservice.Exceptions.UserNotFoundException;
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
+import com.bestgroup.userservice.repository.UserBookingRepository;
+import com.bestgroup.userservice.repository.UserRepository;
 import com.bestgroup.userservice.responseentitystructure.RoomBooking;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,7 +55,7 @@ public class UserService {
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedUser.getId()).toUri();
+                .buildAndExpand(savedUser.getUserId()).toUri();
 
         return ResponseEntity.created(location).build();
     }
@@ -71,14 +79,17 @@ public class UserService {
     }
 
     public User updateUser(int id, User updatedUser) {
-        userRepository.findById(id)
+        Optional<User> userAfterChange = userRepository.findById(id)
                 .map(user -> {
                     user.setFirstName(updatedUser.getFirstName());
                     user.setLastName((updatedUser.getLastName()));
                     userRepository.save(user);
                     return user;
                 });
-        return updatedUser;
+        if(!userAfterChange.isPresent()) {
+            throw new UserNotFoundException("id: " + id);
+        }
+        return userAfterChange.get();
     }
 
     public List<RoomBooking> retrieveUserBookings(int userId) {
@@ -101,8 +112,11 @@ public class UserService {
     private List<RoomBooking> retrieveRoomBookings(List<UserBooking> userBookings) {
         List<Integer> bookingsIds = retrieveUserBookingsIds(userBookings);
         String uri = createUriCall(bookingsIds);
-        RoomBooking[] userBookingsArray= restTemplate.getForObject(uri,  RoomBooking[].class);
-        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray);
+        HttpEntity entity = this.createTokenHeader();
+        ResponseEntity<RoomBooking[]> userBookingsArray;
+        userBookingsArray = restTemplate.exchange(uri, HttpMethod.GET, entity, RoomBooking[].class);
+        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray.getBody());
+
         return roomBookings;
     }
 
@@ -119,6 +133,7 @@ public class UserService {
         UriComponentsBuilder builder = UriComponentsBuilder
                 .fromUriString(uri)
                 .queryParam("bookings", bookingsIds);
+
         return  builder.toUriString();
     }
 
@@ -171,5 +186,24 @@ public class UserService {
 
     public List<UserBooking> getUserBookings(List<Integer> bookings) {
         return  bookingRepository.findAllById(bookings);
+    }
+
+
+
+    private String getTokenFromRequest(){
+        HttpServletRequest request = ((ServletRequestAttributes)
+                RequestContextHolder
+                        .currentRequestAttributes())
+                .getRequest();
+        String value = request.getHeader("Authorization").split(" ")[1];
+        return value;
+    }
+
+    private HttpEntity createTokenHeader(){
+        String token = this.getTokenFromRequest();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + token);
+
+        return new HttpEntity(headers);
     }
 }

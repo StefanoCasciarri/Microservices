@@ -61,4 +61,6 @@ public class UserController {
     public List<UserBooking> getUserBookings(@RequestParam List<Integer> bookings){
         return userService.getUserBookings(bookings);
     }
+
+
 }

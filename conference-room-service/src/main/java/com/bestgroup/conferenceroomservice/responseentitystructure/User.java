@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class User {
 
-    private int id; //has to be id not userId, does not work with UserMS when userId
+    private int userId;
     private String firstName;
     private String lastName;
 

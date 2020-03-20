@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class RoomBookingInfo {
 
     private RoomBooking roomBooking;
-    private User user; //maybe can be renamed to userInfo for clarity
+    private User userInfo;
 
 
 }
