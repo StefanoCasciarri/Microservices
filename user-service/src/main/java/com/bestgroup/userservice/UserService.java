@@ -1,5 +1,7 @@
 package com.bestgroup.userservice;
 
+import com.bestgroup.userservice.Exceptions.OtherServiceNotRespondingException;
+import com.bestgroup.userservice.Exceptions.UserNotFoundException;
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
 import com.bestgroup.userservice.responseentitystructure.RoomBooking;
@@ -22,6 +24,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserBookingRepository bookingRepository;
     private RestTemplate restTemplate;
+    @Autowired
+    private HealthCheck healthCheck;
 
     @Autowired
     public UserService(UserRepository userRepository,
@@ -31,6 +35,7 @@ public class UserService {
         this.bookingRepository = bookingRepository;
         this.restTemplate = restTemplate;
     }
+
 
     public List<User> retrieveAllUsers() {
         return userRepository.findAll();
@@ -77,21 +82,23 @@ public class UserService {
     }
 
     public List<RoomBooking> retrieveUserBookings(int userId) {
-        Optional<User> user = userRepository.findById(userId);
-        if(!user.isPresent()) throw new UserNotFoundException("id: " + userId);//check if user Exixts
+            if(healthCheck.isStatusUp()) {
+                Optional<User> user = userRepository.findById(userId);
+                if (!user.isPresent()) throw new UserNotFoundException("id: " + userId);//check if user Exists
 
-        List<UserBooking> userBookings = user.get().getBookings();
-        List<RoomBooking>  roomBookings = retrieveRoomBookings(userBookings);
+                List<UserBooking> userBookings = user.get().getBookings();
+                List<RoomBooking> roomBookings = retrieveRoomBookings(userBookings);
 
-        //delete those UserBookings that were lost in Room Microservice
-        deleteLostUserBookings(userBookings, roomBookings);
+                //delete those UserBookings that were lost in Room Microservice
+                deleteLostUserBookings(userBookings, roomBookings);
 
-        return roomBookings; // may be empty, if bookingId not found then not shown
+                return roomBookings; // may be empty, if bookingId not found then not shown
+            } else throw new OtherServiceNotRespondingException("http://localhost:8070/conference-rooms/booking/ Bad Response");
+
     }
 
     //retrieve room bookings form Room Microservice
     private List<RoomBooking> retrieveRoomBookings(List<UserBooking> userBookings) {
-
         List<Integer> bookingsIds = retrieveUserBookingsIds(userBookings);
         String uri = createUriCall(bookingsIds);
         RoomBooking[] userBookingsArray= restTemplate.getForObject(uri,  RoomBooking[].class);

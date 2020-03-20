@@ -7,9 +7,6 @@ import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingIn
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;

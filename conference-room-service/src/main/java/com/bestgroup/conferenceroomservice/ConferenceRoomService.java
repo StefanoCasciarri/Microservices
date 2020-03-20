@@ -33,7 +33,6 @@ public class ConferenceRoomService {
 
         ConferenceRoom roomEntityUpdated = conferenceRoomRepository.findById(roomId).orElseThrow(()->new ResourceNotFoundException("No such room."));
 
-
         roomEntityUpdated.setFloor(room.getFloor());
         roomEntityUpdated.setName(room.getName());
         roomEntityUpdated.setSize(room.getSize());
