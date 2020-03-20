@@ -7,6 +7,6 @@ import lombok.Data;
 public class UserBooking {
 
     private int bookingId;
-    private User userId; //TODO change name to user both here and in UserMS
+    private User userId;
 
 }

@@ -6,7 +6,6 @@ import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
 import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
-import com.bestgroup.conferenceroomservice.security.TokenString;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.HttpEntity;
@@ -14,7 +13,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -39,8 +37,7 @@ public class RoomBookingService {
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
                               ConferenceRoomRepository conferenceRoomRepository,
                               ValidationService validationService,
-                              RestTemplate restTemplate,
-                              TokenString tokenString) {
+                              RestTemplate restTemplate) {
         this.roomBookingRepository = roomBookingRepository;
         this.conferenceRoomRepository = conferenceRoomRepository;
         this.validationService = validationService;
@@ -58,7 +55,7 @@ public class RoomBookingService {
         for(RoomBooking roomBooking: roomBookings){
             RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
             roomBookingInfo.setRoomBooking(roomBooking);
-            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
+            roomBookingInfo.setUserInfo(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
             roomBookingInfos.add(roomBookingInfo);
         }
 
@@ -104,12 +101,14 @@ public class RoomBookingService {
         validationService.isDurationValid(roomBooking);
         validationService.isRoomAvailable(roomId, roomBooking);
         return true;
+
     }
 
     public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
         roomBookingRepository.save(roomBooking);
 
         return roomBooking;
+
     }
 
     public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
@@ -127,9 +126,10 @@ public class RoomBookingService {
             throw new ResourceNotFoundException("No such room.");
         }
         return conferenceRoom;
+
     }
 
-    public UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
+    public UserBooking saveRoomBookingtoUser(Integer userId,  RoomBooking roomBooking) {
 
         HttpEntity entity = this.createTokenHeader();
 
@@ -176,7 +176,6 @@ public class RoomBookingService {
 
     private HttpEntity createTokenHeader(){
         String token = this.getTokenFromRequest();
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
 

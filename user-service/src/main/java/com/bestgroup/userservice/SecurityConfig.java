@@ -11,8 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-
-import static com.bestgroup.userservice.security.SecurityConstants.*;
+import static com.bestgroup.userservice.security.SecurityConstants.SIGN_UP_URL;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -20,7 +19,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetails;
     private PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(UserDetailsService userDetails, PasswordEncoder passwordEncoder) {
+    public SecurityConfig( UserDetailsService userDetails, PasswordEncoder passwordEncoder) {
         this.userDetails = userDetails;
         this.passwordEncoder = passwordEncoder;
     }

@@ -74,14 +74,17 @@ public class UserService {
     }
 
     public User updateUser(int id, User updatedUser) {
-        userRepository.findById(id)
+        Optional<User> userAfterChange = userRepository.findById(id)
                 .map(user -> {
                     user.setFirstName(updatedUser.getFirstName());
                     user.setLastName((updatedUser.getLastName()));
                     userRepository.save(user);
                     return user;
                 });
-        return updatedUser;
+        if(!userAfterChange.isPresent()) {
+            throw new UserNotFoundException("id: " + id);
+        }
+        return userAfterChange.get();
     }
 
     public List<RoomBooking> retrieveUserBookings(int userId) {
@@ -99,11 +102,10 @@ public class UserService {
 
         HttpEntity entity = this.createTokenHeader();
         ResponseEntity<RoomBooking[]> userBookingsArray;
-         restTemplate.exchange(uri, HttpMethod.GET, entity, RoomBooking[].class);
-       // List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray.getBody());
-        List<RoomBooking>  roomBookings = new ArrayList<>();
+        userBookingsArray = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, RoomBooking[].class);
+        List<RoomBooking>  roomBookings = Arrays.asList(userBookingsArray.getBody());
         //delete those UserBookings that were lost in Room Microservice
-        //userBookings = deleteLostUserBookings(userBookings, roomBookings);
+        deleteLostUserBookings(userBookings, roomBookings);
 
         return roomBookings; // may be empty, if bookingId not found then not shown
     }
@@ -155,7 +157,6 @@ public class UserService {
 
     private HttpEntity createTokenHeader(){
         String token = this.getTokenFromRequest();
-        RestTemplate restTemplate = new RestTemplate();
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + token);
 
