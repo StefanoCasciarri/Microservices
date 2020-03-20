@@ -88,14 +88,19 @@ public class RoomBookingService {
         if(healthCheck.isStatusUp()) {
             HttpEntity entity = this.createTokenHeader();
 
-        int bookingID = roomBooking.getRoomBookingId();
-        String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
+            int bookingID = roomBooking.getRoomBookingId();
+            String uri = new String("http://localhost:8090/users/" + userId + "/bookings?bookingID=" + bookingID);
 
-        try {
-              ResponseEntity<UserBooking> userBookingResponseEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, UserBooking.class);
-              return userBookingResponseEntity.getBody();
-            } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
-        }
+            try {
+                ResponseEntity<UserBooking> userBookingResponseEntity = restTemplate.exchange(uri, HttpMethod.POST, entity, UserBooking.class);
+                return userBookingResponseEntity.getBody();
+            }catch (Exception e) {
+                //if 404 : cant save to user then delete room booking
+                deleteRoomBooking(roomBooking);
+                throw new ResourceNotFoundException("Cant save to user");
+            }
+        }else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
+
     }
 
     public void deleteRoomBooking(RoomBooking roomBooking) {

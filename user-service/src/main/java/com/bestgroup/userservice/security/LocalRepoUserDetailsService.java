@@ -1,6 +1,6 @@
 package com.bestgroup.userservice.security;
 
-import com.bestgroup.userservice.UserNotFoundException;
+import com.bestgroup.userservice.Exceptions.UserNotFoundException;
 import com.bestgroup.userservice.entities.LocalUser;
 import com.bestgroup.userservice.repository.LocalUserRepository;
 import com.bestgroup.userservice.repository.UserRepository;
