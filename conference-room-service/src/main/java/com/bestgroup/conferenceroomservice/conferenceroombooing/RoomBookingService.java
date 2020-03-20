@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,42 +41,41 @@ public class RoomBookingService {
 
 
     public RoomBookingInfo createRoomBooking(Integer roomId, Integer userId, RoomBooking roomBooking) {
+
         validateRoomBookingParameters(roomId, roomBooking);
         saveRoomBooking(roomBooking);
         saveRoomBookingtoConferenceRoom(roomId, roomBooking);
+        System.out.println(conferenceRoomRepository.findAll());
+        System.out.println(roomBookingRepository.findAll());
         UserBooking userBooking = saveRoomBookingtoUser(userId, roomBooking);
         return new RoomBookingInfo(roomBooking, userBooking.getUserId());
-
     }
 
-    private boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
+
+    public boolean validateRoomBookingParameters(Integer roomId, RoomBooking roomBooking){
         validationService.isRoomExist(roomId);
         validationService.isDurationValid(roomBooking);
         validationService.isRoomAvailable(roomId, roomBooking);
         return true;
     }
 
-    private RoomBooking saveRoomBooking(RoomBooking roomBooking) {
-        roomBookingRepository.save(roomBooking);
 
-        return roomBooking;
+    public RoomBooking saveRoomBooking(RoomBooking roomBooking) {
+
+        return roomBookingRepository.save(roomBooking);
     }
 
-    private ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
-        Optional<ConferenceRoom> optionalConferenceRoom = conferenceRoomRepository.findById(roomId);
-        ConferenceRoom conferenceRoom;
-        if(optionalConferenceRoom.isPresent()){//check not nesecary when used validationService.isRoomExist(roomId);
-            conferenceRoom = optionalConferenceRoom.get();
-            conferenceRoom.getRoomBookings().add(roomBooking);
-            roomBooking.setConferenceRoom(conferenceRoom);
-            conferenceRoomRepository.save(conferenceRoom);
-        }
-        else{
-            //if room doesnt exist then delete saved roomBooking
-            roomBookingRepository.delete(roomBooking);
-            throw new ResourceNotFoundException("No such room.");
-        }
-        return conferenceRoom;
+
+    public ConferenceRoom saveRoomBookingtoConferenceRoom(Integer roomId, RoomBooking roomBooking) {
+
+        validationService.isRoomExist(roomId);// make sure room exists, when saving a room to repo made at beginning so no booking was saved when no room
+        Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomId);
+        conferenceRoom.get().getRoomBookings().add(roomBooking);//add room booking to collection in conference room
+        roomBooking.setConferenceRoom(conferenceRoom.get());
+        conferenceRoomRepository.save(conferenceRoom.get());
+
+        return conferenceRoom.get();
+
     }
 
     private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
@@ -93,15 +93,16 @@ public class RoomBookingService {
 
             return userBookingResponseEntity.getBody();
         } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
+
     }
 
-    private void deleteRoomBooking(RoomBooking roomBooking) {
+    public void deleteRoomBooking(RoomBooking roomBooking) {
         //first delete roomBooking form conferenceRoom collection
         deleteRoomBookingfromConferenceRoom(roomBooking);
         roomBookingRepository.delete(roomBooking);
     }
 
-    private void deleteRoomBookingfromConferenceRoom(RoomBooking roomBooking) {
+    public void deleteRoomBookingfromConferenceRoom(RoomBooking roomBooking) {
         Optional<ConferenceRoom> conferenceRoom = conferenceRoomRepository.findById(roomBooking.getConferenceRoom().getRoomId());
         conferenceRoom.orElseThrow( () -> new ResourceNotFoundException("No such room."));
         conferenceRoom.get().getRoomBookings().remove(roomBooking);
@@ -116,13 +117,7 @@ public class RoomBookingService {
 
         List<RoomBooking> roomBookings = conferenceRoom.get().getRoomBookings();
         List<UserBooking>  userBookings = getUserInfo(roomBookings);
-        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
-        for(RoomBooking roomBooking: roomBookings){
-            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
-            roomBookingInfo.setRoomBooking(roomBooking);
-            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
-            roomBookingInfos.add(roomBookingInfo);
-        }
+        List<RoomBookingInfo> roomBookingInfos =  retrieveRoomBookingsInfo(roomBookings, userBookings);
 
         return roomBookingInfos;
     }
@@ -130,24 +125,46 @@ public class RoomBookingService {
     // call User Microservice to get Info about Users who have those Bookings
     private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
         if(healthCheck.isStatusUp()) {
-            List<Integer> bookings = new ArrayList<>();// list of bookings Ids
-            roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
+             List<Integer> bookingsIds = retrieveRoomBookingsIds(roomBookings);
+             String uri = createUriCall(bookingsIds);
 
-            String uri = new String("http://localhost:8090/users/bookings/");
-            UriComponentsBuilder builder = UriComponentsBuilder
-                    .fromUriString(uri)
-                    .queryParam("bookings", bookings);
-
-            UserBooking[] userBookingsArray = restTemplate.getForObject(builder.toUriString(), UserBooking[].class);
-            List<UserBooking> userBookings = Arrays.asList(userBookingsArray);
+             UserBooking[] userBookingsArray= restTemplate.getForObject(uri,  UserBooking[].class);
+             List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);BookingsArray);
 
             return userBookings;
         } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/bookings/ Bad Response");
 
+
+    public List<Integer> retrieveRoomBookingsIds(List<RoomBooking> roomBookings) {
+
+        List<Integer> bookingsIds = new ArrayList<>();// list of bookings Ids
+        roomBookings.forEach(roomBooking -> bookingsIds.add(roomBooking.getRoomBookingId()));
+        return bookingsIds;
+    }
+
+    private String createUriCall(List<Integer> bookingsIds) {
+
+        String uri = new String("http://localhost:8090/users/bookings/");
+        UriComponentsBuilder builder = UriComponentsBuilder
+                .fromUriString(uri)
+                .queryParam("bookings", bookingsIds);
+        return  builder.toUriString();
+    }
+
+    //retrieve info from room bookings and user bookings and connect them into room bookings info
+    public List<RoomBookingInfo> retrieveRoomBookingsInfo(List<RoomBooking> roomBookings, List<UserBooking> userBookings) {
+        List<RoomBookingInfo> roomBookingInfos = new ArrayList<>();
+        for(RoomBooking roomBooking: roomBookings){
+            RoomBookingInfo roomBookingInfo = new RoomBookingInfo();
+            roomBookingInfo.setRoomBooking(roomBooking);
+            roomBookingInfo.setUser(findUserbyBookingId(roomBooking.getRoomBookingId(), userBookings)); //careful: User can be null!
+            roomBookingInfos.add(roomBookingInfo);
+        }
+        return roomBookingInfos;
     }
 
     //Connect booking id with user id
-    private User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
+    public User findUserbyBookingId(int roomBookingId, List<UserBooking> userBookings) {
         for(UserBooking userBooking: userBookings){
             if (userBooking.getBookingId()== roomBookingId) return userBooking.getUserId();
         }

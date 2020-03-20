@@ -1,6 +1,8 @@
 package com.bestgroup.conferenceroomservice;
 
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,21 +18,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ValidationTest {
 
-    private Validator validator;
 
-    @BeforeEach
-    public void init() {
+    private static Validator validator;
+    private static ValidatorFactory validatorFactory;
 
-        ValidatorFactory vf = Validation.buildDefaultValidatorFactory();
-        this.validator = vf.getValidator();
+    @BeforeAll
+    public static void init() {
+        validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
+    }
 
+    @AfterAll
+    public static void close() {
+        validatorFactory.close();
     }
 
     @Test
     public void validateFloorFieldLowerBound() {
 
         ConferenceRoom conferenceRoom = new ConferenceRoom(-1,"TEST",10);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -45,7 +52,7 @@ public class ValidationTest {
     public void validateFloorFieldUpperBound() {
 
         ConferenceRoom conferenceRoom = new ConferenceRoom(51,"TEST",10);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -61,7 +68,7 @@ public class ValidationTest {
         ConferenceRoom conferenceRoom = new ConferenceRoom();
         conferenceRoom.setSize(15);
         conferenceRoom.setName("TEST");
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -75,7 +82,7 @@ public class ValidationTest {
     public void validateNameFieldLowerBound() {
 
         ConferenceRoom conferenceRoom = new ConferenceRoom(1,"T",10);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -89,7 +96,7 @@ public class ValidationTest {
     public void validateNameFieldUpperBound() {
 
         ConferenceRoom conferenceRoom = new ConferenceRoom(1,"0123456789012345678901234567890",10);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -105,7 +112,7 @@ public class ValidationTest {
         ConferenceRoom conferenceRoom = new ConferenceRoom();
         conferenceRoom.setSize(15);
         conferenceRoom.setFloor(1);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -129,7 +136,7 @@ public class ValidationTest {
         conferenceRoom.setSize(15);
         conferenceRoom.setFloor(1);
         conferenceRoom.setName("");
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -148,7 +155,7 @@ public class ValidationTest {
         conferenceRoom.setSize(15);
         conferenceRoom.setFloor(1);
         conferenceRoom.setName("   ");
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -162,7 +169,7 @@ public class ValidationTest {
     public void validateSizeFieldLowerBound() {
 
         ConferenceRoom conferenceRoom = new ConferenceRoom(1,"TEST",0);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -177,7 +184,7 @@ public class ValidationTest {
     public void validateSizeFieldUpperBound() {
 
         ConferenceRoom conferenceRoom = new ConferenceRoom(1,"TEST",51);
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {
@@ -193,7 +200,7 @@ public class ValidationTest {
         ConferenceRoom conferenceRoom = new ConferenceRoom();
         conferenceRoom.setFloor(1);
         conferenceRoom.setName("TEST");
-        Set<ConstraintViolation<ConferenceRoom>> violations = this.validator.validate(conferenceRoom);
+        Set<ConstraintViolation<ConferenceRoom>> violations = validator.validate(conferenceRoom);
 
         String message = "";
         for (ConstraintViolation<ConferenceRoom> violation : violations) {

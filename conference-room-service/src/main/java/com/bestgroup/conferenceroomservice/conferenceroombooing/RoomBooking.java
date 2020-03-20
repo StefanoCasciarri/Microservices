@@ -36,6 +36,17 @@ public class RoomBooking {
     @Setter
     private ConferenceRoom conferenceRoom;
 
-
-    //TODO validate room not occupied
+    @Override
+    public String toString() {
+        return "RoomBooking{" +
+                "id=" + roomBookingId +
+                "startDateTime=" + startDateTime +
+                "endDateTime=" + endDateTime +
+                "ConferenceRoom{" +
+                "id=" + conferenceRoom.getRoomId() +
+                ", floor=" + conferenceRoom.getFloor() +
+                ", name='" + conferenceRoom.getName() + '\'' +
+                ", size=" + conferenceRoom.getSize() +
+                "}}";
+    }
 }
