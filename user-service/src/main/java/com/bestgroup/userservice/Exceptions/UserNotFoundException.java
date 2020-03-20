@@ -1,4 +1,4 @@
-package com.bestgroup.userservice;
+package com.bestgroup.userservice.Exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

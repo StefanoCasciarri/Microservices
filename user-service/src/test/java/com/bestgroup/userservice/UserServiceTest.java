@@ -1,6 +1,7 @@
 package com.bestgroup.userservice;
 
 
+import com.bestgroup.userservice.Exceptions.UserNotFoundException;
 import com.bestgroup.userservice.entities.User;
 import com.bestgroup.userservice.entities.UserBooking;
 import org.junit.jupiter.api.Test;
