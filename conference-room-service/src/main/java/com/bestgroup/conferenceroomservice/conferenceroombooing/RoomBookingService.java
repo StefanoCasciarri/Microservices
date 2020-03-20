@@ -1,8 +1,6 @@
 package com.bestgroup.conferenceroomservice.conferenceroombooing;
 
-import com.bestgroup.conferenceroomservice.ConferenceRoom;
-import com.bestgroup.conferenceroomservice.ConferenceRoomRepository;
-import com.bestgroup.conferenceroomservice.ResourceNotFoundException;
+import com.bestgroup.conferenceroomservice.*;
 import com.bestgroup.conferenceroomservice.responseentitystructure.RoomBookingInfo;
 import com.bestgroup.conferenceroomservice.responseentitystructure.User;
 import com.bestgroup.conferenceroomservice.responseentitystructure.UserBooking;
@@ -24,16 +22,20 @@ public class RoomBookingService {
     private ConferenceRoomRepository conferenceRoomRepository;
     private ValidationService validationService;
     private RestTemplate restTemplate;
+    private HealthCheck healthCheck;
+
 
     @Autowired
     public RoomBookingService(RoomBookingRepository roomBookingRepository,
                               ConferenceRoomRepository conferenceRoomRepository,
                               ValidationService validationService,
-                              RestTemplate restTemplate) {
+                              RestTemplate restTemplate,
+                              HealthCheck healthCheck) {
         this.roomBookingRepository = roomBookingRepository;
         this.conferenceRoomRepository = conferenceRoomRepository;
         this.validationService = validationService;
         this.restTemplate = restTemplate;
+        this.healthCheck = healthCheck;
     }
 
 
@@ -77,19 +79,20 @@ public class RoomBookingService {
     }
 
     private UserBooking saveRoomBookingtoUser(Integer userId, RoomBooking roomBooking) {
+        if(healthCheck.isStatusUp()) {
+            int bookingID = roomBooking.getRoomBookingId();
+            String uri = new String("http://localhost:8090/users/" + userId + "/bookings?bookingID=" + bookingID);
+            ResponseEntity<UserBooking> userBookingResponseEntity;
+            try {
+                userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
+            } catch (Exception e) {
+                //if 404 : cant save to user then delete room booking
+                deleteRoomBooking(roomBooking);
+                throw new ResourceNotFoundException("Cant save to user");
+            }
 
-        int bookingID = roomBooking.getRoomBookingId();
-        String uri = new String("http://localhost:8090/users/"+ userId +"/bookings?bookingID="+bookingID);
-        ResponseEntity<UserBooking> userBookingResponseEntity;
-        try {
-            userBookingResponseEntity = restTemplate.postForEntity(uri, bookingID, UserBooking.class);
-        }
-        catch(Exception e){
-            //if 404 : cant save to user then delete room booking
-            deleteRoomBooking(roomBooking);
-            throw new ResourceNotFoundException("Cant save to user");
-        }
-        return  userBookingResponseEntity.getBody();
+            return userBookingResponseEntity.getBody();
+        } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/ Bad Response");
     }
 
     private void deleteRoomBooking(RoomBooking roomBooking) {
@@ -126,19 +129,20 @@ public class RoomBookingService {
 
     // call User Microservice to get Info about Users who have those Bookings
     private List<UserBooking> getUserInfo(List<RoomBooking> roomBookings) {
+        if(healthCheck.isStatusUp()) {
+            List<Integer> bookings = new ArrayList<>();// list of bookings Ids
+            roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
 
-        List<Integer> bookings = new ArrayList<>();// list of bookings Ids
-        roomBookings.forEach(roomBooking -> bookings.add(roomBooking.getRoomBookingId()));
+            String uri = new String("http://localhost:8090/users/bookings/");
+            UriComponentsBuilder builder = UriComponentsBuilder
+                    .fromUriString(uri)
+                    .queryParam("bookings", bookings);
 
-        String uri = new String("http://localhost:8090/users/bookings/");
-        UriComponentsBuilder builder = UriComponentsBuilder
-                .fromUriString(uri)
-                .queryParam("bookings", bookings);
+            UserBooking[] userBookingsArray = restTemplate.getForObject(builder.toUriString(), UserBooking[].class);
+            List<UserBooking> userBookings = Arrays.asList(userBookingsArray);
 
-        UserBooking[] userBookingsArray= restTemplate.getForObject(builder.toUriString(),  UserBooking[].class);
-        List<UserBooking>  userBookings = Arrays.asList(userBookingsArray);
-
-        return userBookings;
+            return userBookings;
+        } else throw new OtherServiceNotRespondingException("http://localhost:8090/users/bookings/ Bad Response");
 
     }
 
